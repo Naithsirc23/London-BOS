@@ -144,6 +144,15 @@
   .tbl-row .op.y{color:#388E3C;}
   .tbl-row .op.n{color:#D32F2F;}
   .tbl-row .rpt{font-size:12px;color:#1565C0;font-weight:600;padding:0 4px;}
+  .api-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:5px 9px;border-radius:12px;background:#EEEEEE;color:#616161;}
+  .api-status.ok{background:#E8F5E9;color:#2E7D32;}
+  .api-status.warn{background:#FFF8E1;color:#F57F17;}
+  .api-status.err{background:#FFEBEE;color:#C62828;}
+  .event-row{display:grid;grid-template-columns:170px 1fr 90px 90px;gap:8px;padding:10px;border-radius:8px;background:#F5F5F5;font-size:13px;align-items:center;}
+  .event-row.head{background:#E8F5E9;font-weight:700;color:#1B5E20;text-transform:uppercase;font-size:11px;letter-spacing:.5px;}
+  .event-row .event-name{font-weight:700;color:#1B5E20;}
+  .event-row .event-meta{font-size:12px;color:#757575;}
+  @media(max-width:640px){.event-row{grid-template-columns:1fr 1fr;}.event-row.head{display:none;}}
   /* M1 DUAL */
   .dual{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   .dual-card{border-radius:14px;padding:18px;color:#FFF;}
@@ -391,7 +400,7 @@ Filtro 15–40: DENTRO DE RANGO</div>
 
     <!-- ============ M7 LOGGER ============ -->
     <section id="view-m7" class="hidden">
-      <div class="topbar"><div class="t">Módulo 7 · Logger<small>HISTORIAL DE SESIONES</small></div><span class="info-date" data-date="2026-08-13"><span class="lbl">Info:</span><span class="val">--/--/----</span><span class="tag"></span></span></div>
+      <div class="topbar"><div class="t">Módulo 7 · Logger<small>HISTORIAL DE SESIONES</small></div><span class="info-date" data-date="2026-08-13"><span class="lbl">Info:</span><span class="val">--/--/----</span><span class="tag"></span></span><span id="apiStatus" class="api-status">API: conectando…</span></div>
       <div class="card">
         <h2>Sesiones asiáticas registradas</h2>
         <div class="tbl" id="logTable"><div class="tbl-row head"><div>Fecha</div><div>Techo</div><div>Piso</div><div>Rango</div><div>Op.</div><div>20m</div><div>60m</div></div><div class="tbl-row"><div>2026-08-13</div><div>1.15441</div><div>1.15322</div><div>12.0</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-12</div><div>1.15314</div><div>1.15118</div><div>19.5</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-11</div><div>1.15447</div><div>1.15322</div><div>12.5</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-10</div><div>1.15498</div><div>1.15330</div><div>16.8</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-09</div><div>1.15592</div><div>1.15481</div><div>11.1</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-06</div><div>1.15257</div><div>1.15182</div><div>7.5</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-05</div><div>1.15597</div><div>1.15431</div><div>16.6</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-04</div><div>1.15458</div><div>1.15267</div><div>19.1</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-03</div><div>1.15151</div><div>1.15023</div><div>12.8</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-02</div><div>1.15562</div><div>1.15237</div><div>32.4</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-30</div><div>1.15265</div><div>1.15045</div><div>22.1</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-29</div><div>1.14681</div><div>1.14433</div><div>24.9</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-23</div><div>1.13876</div><div>1.13752</div><div>12.4</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-22</div><div>1.14356</div><div>1.14105</div><div>25.2</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-21</div><div>1.14138</div><div>1.13987</div><div>15.0</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-20</div><div>1.14240</div><div>1.14091</div><div>14.9</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-19</div><div>1.14451</div><div>1.14264</div><div>18.7</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-17</div><div>1.14523</div><div>1.14346</div><div>17.7</div><div class="op y">✅</div><div class="rpt">⚪ SIN BREAKOUT</div><div class="rpt">⚪ SIN BREAKOUT</div></div><div class="tbl-row"><div>2026-07-16</div><div>1.14523</div><div>1.14346</div><div>17.7</div><div class="op y">✅</div><div class="rpt">⚪ SIN BREAKOUT</div><div class="rpt">⚪ SIN BREAKOUT</div></div><div class="tbl-row"><div>2026-07-15</div><div>1.14438</div><div>1.14239</div><div>19.9</div><div class="op y">✅</div><div class="rpt">⚪ SIN BREAKOUT</div><div class="rpt">⚪ SIN BREAKOUT</div></div><div class="tbl-row"><div>2026-07-14</div><div>1.13967</div><div>1.13782</div><div>18.5</div><div class="op y">✅</div><div class="rpt">⚪ SIN BREAKOUT</div><div class="rpt">⚪ SIN BREAKOUT</div></div><div class="tbl-row"><div>2026-07-13</div><div>1.14092</div><div>1.13844</div><div>24.9</div><div class="op y">✅</div><div class="rpt">⚪ SIN BREAKOUT</div><div class="rpt">⚪ SIN BREAKOUT</div></div></div>
@@ -400,7 +409,11 @@ Filtro 15–40: DENTRO DE RANGO</div>
       <div class="card">
         <h2>📝 Paper Trades (simulación local con datos reales)</h2>
         <div class="tbl" id="paperTable"><div class="tbl-row head"><div>Fecha</div><div>Dir</div><div>Entry</div><div>Salida</div><div>R</div></div><div class="tbl-row"><div>2026-08-14</div><div>—</div><div>—</div><div>SKIP</div><div>—</div></div><div class="tbl-row"><div>2026-08-13</div><div>BUY</div><div>1.15315</div><div>ABIERTA_11H</div><div class="op y">+0.13</div></div><div class="tbl-row"><div>2026-08-12</div><div>—</div><div>—</div><div>SKIP</div><div>—</div></div><div class="tbl-row"><div>2026-08-11</div><div>BUY</div><div>1.15500</div><div>ABIERTA_11H</div><div class="op n">-0.23</div></div><div class="tbl-row"><div>2026-08-10</div><div>—</div><div>—</div><div>SKIP</div><div>—</div></div><div class="tbl-row"><div>2026-08-07</div><div>—</div><div>—</div><div>SKIP</div><div>—</div></div><div class="tbl-row"><div>2026-08-06</div><div>SELL</div><div>1.15429</div><div>ABIERTA_11H</div><div class="op y">+1.08</div></div><div class="tbl-row"><div>2026-08-05</div><div>BUY</div><div>1.15460</div><div>ABIERTA_11H</div><div class="op y">+0.21</div></div><div class="tbl-row"><div>2026-08-04</div><div>—</div><div>—</div><div>SKIP</div><div>—</div></div><div class="tbl-row"><div>2026-08-03</div><div>SELL</div><div>1.15236</div><div>ABIERTA_11H</div><div class="op y">+0.33</div></div><div class="tbl-row"><div>2026-07-31</div><div>BUY</div><div>1.15267</div><div>SL</div><div class="op n">-1.00</div></div><div class="tbl-row"><div>2026-07-30</div><div>SELL</div><div>1.14431</div><div>SL</div><div class="op n">-1.00</div></div><div class="tbl-row"><div>2026-07-29</div><div>SELL</div><div>1.13827</div><div>ABIERTA_11H</div><div class="op n">-0.14</div></div><div class="tbl-row"><div>2026-07-24</div><div>—</div><div>—</div><div>SKIP</div><div>—</div></div><div class="tbl-row"><div>2026-07-23</div><div>SELL</div><div>1.14103</div><div>TP</div><div class="op y">+1.50</div></div><div class="tbl-row"><div>2026-07-22</div><div>BUY</div><div>1.14139</div><div>ABIERTA_11H</div><div class="op y">+0.19</div></div><div class="tbl-row"><div>2026-07-21</div><div>—</div><div>—</div><div>SKIP</div><div>—</div></div><div class="tbl-row"><div>2026-07-20</div><div>BUY</div><div>1.14453</div><div>SL</div><div class="op n">-1.00</div></div><div class="tbl-row"><div>2026-07-13</div><div>BUY</div><div>1.14094</div><div>TP</div><div class="op y">+1.50</div></div></div>
-        <div class="note" style="margin-top:10px;">Motor paper (Opción B): simula el ciclo M5 (BE+1R / parcial+2R / trailing) sobre barras 1m reales de 02:00–11:00 Lima. No ejecuta en IB.</div>
+        <div class="note" style="margin-top:10px;">Motor paper (Opción B): simula el ciclo M5 sobre barras 1m reales. No ejecuta en IB.</div>
+      </div>
+      <div class="card">
+        <h2>Eventos operativos <span id="eventsFreshness" class="api-status">sin datos</span></h2>
+        <div class="tbl" id="eventsTable"><div class="event-row head"><div>Fecha</div><div>Evento</div><div>Precio</div><div>R</div></div><div class="note">Cargando eventos…</div></div>
       </div>
     </section>
 
@@ -620,8 +633,57 @@ document.getElementById('nSend').addEventListener('click',()=>{
   st.style.color='#757575';
 });
 
-// ---- M7 LOGGER ----
-// las filas ya vienen inyectadas desde fx_session.py (<div class="tbl-row head"><div>Fecha</div><div>Techo</div><div>Piso</div><div>Rango</div><div>Op.</div><div>20m</div><div>60m</div></div><div class="tbl-row"><div>2026-08-13</div><div>1.15441</div><div>1.15322</div><div>12.0</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-12</div><div>1.15314</div><div>1.15118</div><div>19.5</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-11</div><div>1.15447</div><div>1.15322</div><div>12.5</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-10</div><div>1.15498</div><div>1.15330</div><div>16.8</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-09</div><div>1.15592</div><div>1.15481</div><div>11.1</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-06</div><div>1.15257</div><div>1.15182</div><div>7.5</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-05</div><div>1.15597</div><div>1.15431</div><div>16.6</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-04</div><div>1.15458</div><div>1.15267</div><div>19.1</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-03</div><div>1.15151</div><div>1.15023</div><div>12.8</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-08-02</div><div>1.15562</div><div>1.15237</div><div>32.4</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-30</div><div>1.15265</div><div>1.15045</div><div>22.1</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-29</div><div>1.14681</div><div>1.14433</div><div>24.9</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-23</div><div>1.13876</div><div>1.13752</div><div>12.4</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-22</div><div>1.14356</div><div>1.14105</div><div>25.2</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-21</div><div>1.14138</div><div>1.13987</div><div>15.0</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-20</div><div>1.14240</div><div>1.14091</div><div>14.9</div><div class="op n">❌</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-19</div><div>1.14451</div><div>1.14264</div><div>18.7</div><div class="op y">✅</div><div class="rpt">—</div><div class="rpt">—</div></div><div class="tbl-row"><div>2026-07-17</div><div>1.14523</div><div>1.14346</div><div>17.7</div><div class="op y">✅</div><div class="rpt">⚪ SIN BREAKOUT</div><div class="rpt">⚪ SIN BREAKOUT</div></div><div class="tbl-row"><div>2026-07-16</div><div>1.14523</div><div>1.14346</div><div>17.7</div><div class="op y">✅</div><div class="rpt">⚪ SIN BREAKOUT</div><div class="rpt">⚪ SIN BREAKOUT</div></div><div class="tbl-row"><div>2026-07-15</div><div>1.14438</div><div>1.14239</div><div>19.9</div><div class="op y">✅</div><div class="rpt">⚪ SIN BREAKOUT</div><div class="rpt">⚪ SIN BREAKOUT</div></div><div class="tbl-row"><div>2026-07-14</div><div>1.13967</div><div>1.13782</div><div>18.5</div><div class="op y">✅</div><div class="rpt">⚪ SIN BREAKOUT</div><div class="rpt">⚪ SIN BREAKOUT</div></div><div class="tbl-row"><div>2026-07-13</div><div>1.14092</div><div>1.13844</div><div>24.9</div><div class="op y">✅</div><div class="rpt">⚪ SIN BREAKOUT</div><div class="rpt">⚪ SIN BREAKOUT</div></div>).
-// no requiere JS adicional; la tabla se puebla al generar el dashboard.
+// ---- M7 LOGGER + API READ-ONLY ----
+const API_BASE = window.LONDON_BOS_API_BASE || (location.protocol === 'file:' ? 'http://127.0.0.1:8080' : '');
+const esc = value => String(value ?? '—').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+const apiGet = path => fetch(`${API_BASE}${path}`, {headers:{'Accept':'application/json'}}).then(r => {
+  if(!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+});
+function setApiStatus(kind, text){
+  const el=document.getElementById('apiStatus');
+  if(!el) return;
+  el.className=`api-status ${kind}`;
+  el.textContent=`API: ${text}`;
+}
+function renderSessions(rows){
+  const el=document.getElementById('logTable');
+  if(!el || !rows.length) return;
+  el.innerHTML='<div class="tbl-row head"><div>Fecha</div><div>Techo</div><div>Piso</div><div>Rango</div><div>Op.</div><div>20m</div><div>60m</div></div>'+rows.map(r=>
+    `<div class="tbl-row"><div>${esc(r.fecha)}</div><div>${esc(Number(r.maximo).toFixed(5))}</div><div>${esc(Number(r.minimo).toFixed(5))}</div><div>${esc(Number(r.rango_pips).toFixed(1))}</div><div class="op ${r.operable?'y':'n'}">${r.operable?'✓':'✕'}</div><div class="rpt">${esc(r.ruptura_20)}</div><div class="rpt">${esc(r.ruptura_60)}</div></div>`).join('');
+}
+function renderPaper(rows){
+  const el=document.getElementById('paperTable');
+  if(!el || !rows.length) return;
+  el.innerHTML='<div class="tbl-row head"><div>Fecha</div><div>Dir</div><div>Entry</div><div>Salida</div><div>R</div></div>'+rows.map(r=>
+    `<div class="tbl-row"><div>${esc(r.fecha)}</div><div>${esc(r.direccion)}</div><div>${r.entry==null?'—':esc(Number(r.entry).toFixed(5))}</div><div>${esc(r.salida)}</div><div class="op ${(r.r??-1)>=0?'y':'n'}">${r.r==null?'—':esc(Number(r.r).toFixed(2))}</div></div>`).join('');
+}
+function renderEvents(rows, freshness){
+  const el=document.getElementById('eventsTable');
+  const fresh=document.getElementById('eventsFreshness');
+  if(fresh){ fresh.textContent=freshness?.updated_at ? `último: ${new Date(freshness.updated_at).toLocaleString()}` : 'sin eventos'; fresh.className='api-status'; }
+  if(!el) return;
+  const head='<div class="event-row head"><div>Fecha</div><div>Evento</div><div>Precio</div><div>R</div></div>';
+  el.innerHTML=head+(rows.length?rows.map(r=>`<div class="event-row"><div class="event-meta">${esc(new Date(r.timestamp).toLocaleString())}</div><div><span class="event-name">${esc(r.event)}</span><div class="event-meta">${esc(r.source)} · ${esc(r.session_date)}</div></div><div>${r.price==null?'—':esc(Number(r.price).toFixed(5))}</div><div>${r.r_multiple==null?'—':esc(Number(r.r_multiple).toFixed(2))}</div></div>`).join(''):'<div class="note">No hay eventos registrados.</div>');
+}
+async function refreshDashboardData(){
+  try{
+    const [health, sessions, paper, events] = await Promise.all([
+      apiGet('/api/health'), apiGet('/api/session/history?limit=30'),
+      apiGet('/api/paper-trades?limit=30'), apiGet('/api/events?limit=50')
+    ]);
+    setApiStatus('ok', `${health.mode || 'read_only'} · ${health.checked_at ? new Date(health.checked_at).toLocaleTimeString() : 'conectada'}`);
+    renderSessions(sessions.data || []);
+    renderPaper(paper.data || []);
+    renderEvents(events.data || [], events.freshness);
+  } catch(error){
+    setApiStatus('warn', 'offline · vista local');
+    const fresh=document.getElementById('eventsFreshness');
+    if(fresh){fresh.textContent='API no disponible';fresh.className='api-status warn';}
+    console.warn('London-BOS API offline:', error);
+  }
+}
+refreshDashboardData();
+setInterval(refreshDashboardData, 30000);
 </script>
 </body></html>

@@ -389,11 +389,15 @@ def _leer_paper_rows():
 
 
 def _log_sesion(inicio, maximo, minimo, rango_pips, en_zona, nbarras):
-    """Registra la sesión asiática en SQLite (Módulo 7 · Logger)."""
-    import sqlite3, os
+    """Registra la sesión y emite un evento estructurado para el dashboard."""
+    import os
+    from londonbos_core.storage import record_event
+
     db = os.path.join(os.path.dirname(os.path.abspath(__file__)), "londonbos_log.db")
     fecha = inicio.strftime("%Y-%m-%d")
+    generado = datetime.now(lima_tz)
     try:
+        import sqlite3
         con = sqlite3.connect(db)
         con.execute("""CREATE TABLE IF NOT EXISTS sesiones (
             fecha TEXT PRIMARY KEY, maximo REAL, minimo REAL,
@@ -407,11 +411,24 @@ def _log_sesion(inicio, maximo, minimo, rango_pips, en_zona, nbarras):
             operable=excluded.operable, barras=excluded.barras,
             generado=excluded.generado""",
             (fecha, maximo, minimo, rango_pips, 1 if en_zona else 0,
-             nbarras, datetime.now(lima_tz).strftime("%Y-%m-%d %H:%M:%S"),
-             None, None))
+             nbarras, generado.strftime("%Y-%m-%d %H:%M:%S"), None, None))
         con.commit()
         con.close()
-        print(f"[LOG] Sesión {fecha} registrada en logger.")
+        record_event(
+            db,
+            "SESSION_RECORDED",
+            timestamp=generado,
+            session_date=fecha,
+            source="fx_session",
+            metadata={
+                "high": maximo,
+                "low": minimo,
+                "range_pips": rango_pips,
+                "operable": bool(en_zona),
+                "bars": nbarras,
+            },
+        )
+        print(f"[LOG] Sesión {fecha} registrada en logger y eventos.")
     except Exception as e:
         print(f"[LOG] No se pudo registrar (no bloquea): {e}")
 

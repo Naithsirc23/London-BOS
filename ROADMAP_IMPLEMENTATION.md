@@ -14,9 +14,9 @@ La lógica de estrategia debe ser determinista y testeable. Las fuentes externas
 |---|---|---|
 | 0. Seguridad y saneamiento | Secretos, DB y logs fuera de Git; `.env.example`; configuración local documentada. | **Iniciada** |
 | 1. Dominio común | Contratos `SessionBox`, `TradePlan`, `BreakoutSnapshot`, `StrategyConfig` y reglas puras compartidas. | **Iniciada** |
-| 2. Correcciones de consistencia | `breakout_check.py` consume el diccionario real de `calcular_box()`; el simulador comparte planes y RR. | **Iniciada** |
-| 3. API de lectura | Endpoints JSON para health, sesión, historial, paper trades y eventos. | **Iniciada** |
-| 4. Dashboard por widgets | Sustituir placeholders acoplados por widgets con estado de carga, error, frescura y refresco. | Pendiente |
+| 2. Correcciones de consistencia | `breakout_check.py` consume el diccionario real de `calcular_box()`; el simulador comparte planes y RR. | **Completada** |
+| 3. API de lectura | Endpoints JSON para health, sesión, historial, paper trades y eventos, con frescura y modo read-only. | **Completada** |
+| 4. Dashboard por widgets | La SPA consulta JSON, refresca cada 30 segundos y muestra estado de API, historial, paper trades y eventos. | **Iniciada** |
 | 5. Analítica | Equity curve, drawdown, expectancy, profit factor, distribución de R y gráficos por sesión. | Pendiente |
 | 6. Datos históricos | Adaptador IB/CSV/Dukascopy con cache, normalización de timezone y backtest multi-mes. | Pendiente |
 | 7. Operación robusta | Scheduler configurable, logs estructurados, alertas de salud, backups y recuperación. | Pendiente |
@@ -48,3 +48,11 @@ PYTHONPATH=DATA uvicorn api:app --app-dir DATA --host 127.0.0.1 --port 8080
 ```
 
 La API debe exponerse únicamente en `127.0.0.1` durante esta fase. No se deben activar órdenes reales ni publicar `DATA/.env`, `DATA/londonbos_log.db` o los logs operativos.
+
+## Segunda iteración: eventos y conexión del dashboard
+
+La tabla `trade_events` se crea de forma no destructiva junto con `schema_meta`, conserva timestamp, sesión, dirección, precio, R, fuente y metadata JSON, y cuenta con índices por timestamp y sesión. `fx_session.py` emite `SESSION_RECORDED` al registrar una sesión; `paper_trade.py` emite `PAPER_TRADE_COMPLETED` al guardar un resultado.
+
+La SPA central y el `index.html` de raíz consumen `/api/health`, `/api/session/history`, `/api/paper-trades` y `/api/events`. El refresco ocurre cada 30 segundos, mantiene los datos HTML preinyectados como fallback y muestra claramente `read_only`, offline o última actualización. Los eventos aparecen en una línea temporal dentro del Módulo 7.
+
+La siguiente mejora es conectar también eventos de `ARMED`, `BREAKOUT_DETECTED`, `BREAK_EVEN`, `PARTIAL` y `CLOSED` desde una máquina de estados única, además de añadir filtros de fecha y una API de métricas agregadas.

@@ -166,6 +166,8 @@ def simular(box, barras):
 
 
 def guardar_paper(fecha, res):
+    from londonbos_core.storage import record_event
+
     db = os.path.join(os.path.dirname(os.path.abspath(__file__)), "londonbos_log.db")
     con = sqlite3.connect(db)
     con.execute("""CREATE TABLE IF NOT EXISTS paper (
@@ -180,6 +182,21 @@ def guardar_paper(fecha, res):
          res["salida"], res["r"]))
     con.commit()
     con.close()
+    record_event(
+        db,
+        "PAPER_TRADE_COMPLETED",
+        session_date=fecha,
+        direction=res.get("direccion"),
+        price=res.get("entry"),
+        r_multiple=res.get("r"),
+        source="paper_trade",
+        metadata={
+            "exit": res.get("salida"),
+            "take_profit": res.get("tp"),
+            "stop_loss": res.get("sl"),
+            "milestones": [h[0] for h in res.get("hitos", [])],
+        },
+    )
 
 
 def main():
