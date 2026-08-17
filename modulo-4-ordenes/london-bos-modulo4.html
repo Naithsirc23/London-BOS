@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>London BOS · Módulo 4 — Órdenes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black: #0A0A0A; --gold: #C9A84C; --gold-dim: rgba(201,168,76,0.15);
+    --paper: #E8E4DC; --green: #4CAF7D; --red: #E05252;
+    --divider: rgba(201,168,76,0.18); --gray: rgba(232,228,220,0.25);
+    --blue: #5B8DD9;
+  }
+  body { background: var(--black); color: var(--paper); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+  .status-bar { display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; border: 1px solid var(--divider); border-radius: 6px; }
+  .logo { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; }
+  .status-date { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: var(--gold); background: rgba(201,168,76,0.10); border: 1px solid rgba(201,168,76,0.3); padding: 3px 8px; border-radius: 3px; text-transform: uppercase; }
+  .pulse { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--green); animation: p 2s infinite; }
+  @keyframes p { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+  .card { border: 1px solid var(--divider); border-radius: 6px; padding: 14px; }
+  .card-title { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .info-date { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.08em; color: var(--gray); text-transform: none; display: inline-flex; align-items: center; gap: 6px; }
+  .info-date .val { color: var(--paper); font-weight: 700; }
+  .info-date .tag { font-size: 7px; font-weight: 700; padding: 1px 5px; border-radius: 2px; letter-spacing: 0.1em; }
+  .info-date .tag.ok { background: rgba(76,175,125,0.15); color: var(--green); border: 1px solid rgba(76,175,125,0.4); }
+  .info-date .tag.old { background: rgba(224,82,82,0.12); color: var(--red); border: 1px solid rgba(224,82,82,0.4); }
+
+  /* INPUTS */
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .input-box { display: flex; flex-direction: column; gap: 4px; }
+  .input-lbl { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; color: var(--gray); text-transform: uppercase; }
+  .num-input {
+    font-family: 'Space Mono', monospace; font-size: 15px; font-weight: 700;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--divider);
+    color: var(--paper); border-radius: 4px; padding: 7px 10px;
+    width: 100%; outline: none; transition: border-color 0.3s;
+  }
+  .num-input:focus { border-color: var(--gold); }
+  .pips-display { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--gold); text-align: center; padding-top: 4px; }
+
+  /* MODE SELECTOR */
+  .mode-selector { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .mode-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 10px 6px; border-radius: 5px; cursor: pointer;
+    border: 1px solid var(--divider); background: rgba(255,255,255,0.02);
+    transition: all 0.25s;
+  }
+  .mode-btn.active { border-color: var(--gold); background: var(--gold-dim); }
+  .mode-btn input[type=radio] { display: none; }
+  .mode-icon { font-size: 18px; }
+  .mode-name { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.08em; text-align: center; transition: color 0.25s; }
+  .mode-btn.active .mode-name { color: var(--gold); }
+  .mode-desc { font-family: 'DM Sans', sans-serif; font-size: 9px; color: rgba(232,228,220,0.3); text-align: center; line-height: 1.3; transition: color 0.25s; }
+  .mode-btn.active .mode-desc { color: rgba(232,228,220,0.55); }
+
+  /* MODE PARAMS */
+  .mode-params { margin-top: 10px; display: none; }
+  .mode-params.visible { display: block; }
+  .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .param-row { display: flex; flex-direction: column; gap: 4px; }
+  .param-lbl { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.08em; }
+  .param-note { font-family: 'DM Sans', sans-serif; font-size: 10px; color: rgba(232,228,220,0.4); margin-top: 6px; line-height: 1.5; }
+  .param-note span { color: var(--gold); }
+
+  /* PRICE CHART */
+  .price-chart { position: relative; height: 280px; }
+  .pc-track { position: absolute; left: 58px; right: 8px; top: 0; bottom: 0; }
+  .pc-line { position: absolute; left: 0; right: 0; }
+  .pc-line.solid  { border-top: 1.5px solid; }
+  .pc-line.dashed { border-top: 1.5px dashed; opacity: 0.55; }
+  .pc-line.green { border-color: var(--green); }
+  .pc-line.red   { border-color: var(--red); }
+  .pc-line.gold  { border-color: var(--gold); }
+  .pc-line.blue  { border-color: var(--blue); }
+  .pc-price-label { position: absolute; left: -58px; font-family: 'Space Mono', monospace; font-size: 7px; transform: translateY(-50%); color: var(--gray); width: 54px; text-align: right; }
+  .pc-label { position: absolute; right: 0; font-family: 'Space Mono', monospace; font-size: 7px; transform: translateY(-50%); text-align: right; line-height: 1.3; }
+  .pc-zone { position: absolute; left: 0; right: 0; }
+
+  /* ORDEN CARDS */
+  .orden-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .orden-card { border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 5px; }
+  .orden-card.buy  { border: 1px solid rgba(76,175,125,0.35);  background: rgba(76,175,125,0.05); }
+  .orden-card.sell { border: 1px solid rgba(224,82,82,0.35);   background: rgba(224,82,82,0.05); }
+  .orden-header { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; margin-bottom: 2px; }
+  .orden-header.buy  { color: var(--green); }
+  .orden-header.sell { color: var(--red); }
+  .orden-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .orden-key { font-family: 'Space Mono', monospace; font-size: 7px; color: var(--gray); text-transform: uppercase; }
+  .orden-val { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; color: var(--paper); }
+  .orden-val.sl { color: var(--red); }
+  .orden-val.tp { color: var(--green); }
+  .orden-val.tr { color: var(--blue); }
+  .orden-rr { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--gold); margin-top: 4px; text-align: center; border-top: 1px solid rgba(201,168,76,0.15); padding-top: 5px; }
+  .orden-badge { font-family: 'Space Mono', monospace; font-size: 7px; padding: 2px 5px; border-radius: 2px; background: rgba(91,141,217,0.15); color: var(--blue); border: 1px solid rgba(91,141,217,0.3); text-align: center; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="status-bar">
+  <div class="logo">LB · Módulo 4 — Órdenes</div>
+  <span class="status-date" id="statusDate">📅 --/--/----</span>
+  <span class="pulse"></span>
+</div>
+
+<!-- DATOS ASIATICOS -->
+<div class="card">
+  <div class="card-title">📥 Datos del Módulo 2
+    <span class="info-date" data-date="2026-07-19"><span class="val">--/--/----</span><span class="tag"></span></span>
+  </div>
+  <div class="input-grid">
+    <div class="input-box">
+      <div class="input-lbl">Máximo asiático</div>
+      <input class="num-input" id="inHigh" type="number" value="1.08475" step="0.00001">
+    </div>
+    <div class="input-box">
+      <div class="input-lbl">Mínimo asiático</div>
+      <input class="num-input" id="inLow" type="number" value="1.08230" step="0.00001">
+    </div>
+  </div>
+  <div class="pips-display" id="pipsDisplay">Rango: — pips</div>
+</div>
+
+<!-- MODO TP/SL -->
+<div class="card">
+  <div class="card-title">⚙️ Modo TP / SL
+    <span class="info-date" data-date="today"><span class="val">--/--/----</span><span class="tag"></span></span>
+  </div>
+  <div class="mode-selector">
+
+    <label class="mode-btn active" id="btn-fixed">
+      <input type="radio" name="mode" value="fixed" checked>
+      <div class="mode-icon">📌</div>
+      <div class="mode-name">Fijo</div>
+      <div class="mode-desc">TP = 1× rango SL = extremo opuesto</div>
+    </label>
+
+    <label class="mode-btn" id="btn-manual">
+      <input type="radio" name="mode" value="manual">
+      <div class="mode-icon">🎛️</div>
+      <div class="mode-name">Manual</div>
+      <div class="mode-desc">Defines SL y R:R tú mismo</div>
+    </label>
+
+    <label class="mode-btn" id="btn-trailing">
+      <input type="radio" name="mode" value="trailing">
+      <div class="mode-icon">🎯</div>
+      <div class="mode-name">Trailing</div>
+      <div class="mode-desc">SL sigue al precio paso a paso</div>
+    </label>
+
+  </div>
+
+  <!-- PARAMS FIJO: nada extra -->
+
+  <!-- PARAMS MANUAL -->
+  <div class="mode-params" id="params-manual">
+    <div class="param-grid">
+      <div class="param-row">
+        <div class="param-lbl">SL en pips</div>
+        <input class="num-input" id="manualSL" type="number" value="25" step="1" min="1">
+      </div>
+      <div class="param-row">
+        <div class="param-lbl">Ratio R:R</div>
+        <input class="num-input" id="manualRR" type="number" value="1.5" step="0.1" min="0.5">
+      </div>
+    </div>
+    <div class="param-note">TP = SL × R:R → arriesgas <span id="manNote1">—</span> pips para ganar <span id="manNote2">—</span> pips</div>
+  </div>
+
+  <!-- PARAMS TRAILING -->
+  <div class="mode-params" id="params-trailing">
+    <div class="param-grid">
+      <div class="param-row">
+        <div class="param-lbl">Step trailing (pips)</div>
+        <input class="num-input" id="trailStep" type="number" value="10" step="1" min="1">
+      </div>
+      <div class="param-row">
+        <div class="param-lbl">Activar desde (pips)</div>
+        <input class="num-input" id="trailActivate" type="number" value="15" step="1" min="1">
+      </div>
+    </div>
+    <div class="param-note">El SL se mueve cada <span id="trailNote1">—</span> pips que avance el precio, activándose al llegar a +<span id="trailNote2">—</span> pips de ganancia. Gestionado en Módulo 5.</div>
+  </div>
+</div>
+
+<!-- MAPA -->
+<div class="card">
+  <div class="card-title">📊 Mapa de órdenes
+    <span class="info-date" data-date="today"><span class="val">--/--/----</span><span class="tag"></span></span>
+  </div>
+  <div class="price-chart" id="priceChart"></div>
+</div>
+
+<!-- ORDENES -->
+<div class="orden-grid">
+  <div class="orden-card buy">
+    <div class="orden-header buy">🟢 BUY STOP</div>
+    <div class="orden-row"><div class="orden-key">Entrada</div><div class="orden-val" id="bEntry">—</div></div>
+    <div class="orden-row"><div class="orden-key">Stop Loss</div><div class="orden-val sl" id="bSL">—</div></div>
+    <div class="orden-row"><div class="orden-key">Take Profit</div><div class="orden-val tp" id="bTP">—</div></div>
+    <div class="orden-rr" id="bRR">—</div>
+    <div class="orden-badge" id="bBadge" style="display:none"></div>
+  </div>
+  <div class="orden-card sell">
+    <div class="orden-header sell">🔴 SELL STOP</div>
+    <div class="orden-row"><div class="orden-key">Entrada</div><div class="orden-val" id="sEntry">—</div></div>
+    <div class="orden-row"><div class="orden-key">Stop Loss</div><div class="orden-val sl" id="sSL">—</div></div>
+    <div class="orden-row"><div class="orden-key">Take Profit</div><div class="orden-val tp" id="sTP">—</div></div>
+    <div class="orden-rr" id="sRR">—</div>
+    <div class="orden-badge" id="sBadge" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+  const MARGIN = 0.00002;
+  const f5 = n => n.toFixed(5);
+  const toPips = n => (n * 10000).toFixed(1);
+
+  let currentMode = 'fixed';
+
+  // Mode buttons
+  document.querySelectorAll('input[name=mode]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      currentMode = radio.value;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`btn-${currentMode}`).classList.add('active');
+      document.querySelectorAll('.mode-params').forEach(p => p.classList.remove('visible'));
+      if (currentMode !== 'fixed') {
+        document.getElementById(`params-${currentMode}`).classList.add('visible');
+      }
+      compute();
+    });
+  });
+
+  // Param inputs
+  ['inHigh','inLow','manualSL','manualRR','trailStep','trailActivate'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', compute);
+  });
+
+  function compute() {
+    const high = parseFloat(document.getElementById('inHigh').value);
+    const low  = parseFloat(document.getElementById('inLow').value);
+    if (isNaN(high) || isNaN(low) || high <= low) return;
+
+    const range = high - low;
+    const pips  = parseFloat(toPips(range));
+    const ok    = pips >= 15 && pips <= 40;
+    document.getElementById('pipsDisplay').textContent = `Rango: ${pips.toFixed(1)} pips ${ok?'✅':'❌ fuera de zona'}`;
+
+    const bEntry = high + MARGIN;
+    const sEntry = low  - MARGIN;
+    let bSL, bTP, sSL, sTP, rrLabel, badge;
+
+    if (currentMode === 'fixed') {
+      bSL = low  - MARGIN;
+      bTP = bEntry + range;
+      sSL = high + MARGIN;
+      sTP = sEntry - range;
+      const rr = (range / (range + MARGIN*2)).toFixed(2);
+      rrLabel = `R:R 1:${rr}`;
+      badge = null;
+
+    } else if (currentMode === 'manual') {
+      const slPips = parseFloat(document.getElementById('manualSL').value) || 25;
+      const rr     = parseFloat(document.getElementById('manualRR').value) || 1.5;
+      const slVal  = slPips * 0.0001;
+      const tpVal  = slPips * rr * 0.0001;
+      bSL = bEntry - slVal;
+      bTP = bEntry + tpVal;
+      sSL = sEntry + slVal;
+      sTP = sEntry - tpVal;
+      rrLabel = `R:R 1:${rr.toFixed(1)}`;
+      badge = null;
+      document.getElementById('manNote1').textContent = slPips;
+      document.getElementById('manNote2').textContent = (slPips * rr).toFixed(1);
+
+    } else { // trailing
+      const step     = parseFloat(document.getElementById('trailStep').value) || 10;
+      const activate = parseFloat(document.getElementById('trailActivate').value) || 15;
+      bSL = low  - MARGIN;
+      bTP = bEntry + range;
+      sSL = high + MARGIN;
+      sTP = sEntry - range;
+      rrLabel = `Trailing desde +${activate} pips`;
+      badge = `SL se mueve cada ${step} pips`;
+      document.getElementById('trailNote1').textContent = step;
+      document.getElementById('trailNote2').textContent = activate;
+    }
+
+    // Fill cards
+    document.getElementById('bEntry').textContent = f5(bEntry);
+    document.getElementById('bSL').textContent    = f5(bSL);
+    document.getElementById('bTP').textContent    = currentMode==='trailing' ? 'Abierto 🎯' : f5(bTP);
+    document.getElementById('bRR').textContent    = rrLabel;
+    document.getElementById('sEntry').textContent = f5(sEntry);
+    document.getElementById('sSL').textContent    = f5(sSL);
+    document.getElementById('sTP').textContent    = currentMode==='trailing' ? 'Abierto 🎯' : f5(sTP);
+    document.getElementById('sRR').textContent    = rrLabel;
+
+    const bb = document.getElementById('bBadge');
+    const sb = document.getElementById('sBadge');
+    if (badge) {
+      bb.textContent = badge; bb.style.display = 'block';
+      sb.textContent = badge; sb.style.display = 'block';
+    } else {
+      bb.style.display = 'none';
+      sb.style.display = 'none';
+    }
+
+    renderChart({ high, low, bEntry, bSL, bTP: currentMode==='trailing'?null:bTP, sEntry, sSL, sTP: currentMode==='trailing'?null:sTP });
+  }
+
+  function renderChart({ high, low, bEntry, bSL, bTP, sEntry, sSL, sTP }) {
+    const chart = document.getElementById('priceChart');
+    chart.innerHTML = '';
+    const track = document.createElement('div');
+    track.className = 'pc-track';
+    chart.appendChild(track);
+
+    const prices = [bEntry, bSL, high, low, sEntry, sSL];
+    if (bTP) prices.push(bTP);
+    if (sTP) prices.push(sTP);
+    const maxP = Math.max(...prices);
+    const minP = Math.min(...prices);
+    const span = maxP - minP || 0.001;
+    const pad  = span * 0.1;
+
+    function yPct(price) {
+      return ((maxP + pad - price) / (span + pad * 2)) * 100;
+    }
+
+    // Asian zone
+    const zone = document.createElement('div');
+    zone.className = 'pc-zone';
+    zone.style.cssText = `top:${yPct(high)}%;height:${yPct(low)-yPct(high)}%;background:rgba(201,168,76,0.07);position:absolute;left:0;right:0;`;
+    track.appendChild(zone);
+
+    const lines = [
+      bTP  ? { price: bTP,    cls:'green dashed', label:'🎯 TP Buy',   col:'#4CAF7D' } : null,
+      { price: bEntry, cls:'green solid',  label:'🪤 BUY STOP', col:'#4CAF7D' },
+      { price: high,   cls:'gold solid',   label:'Máx Asia',    col:'#C9A84C' },
+      { price: low,    cls:'gold solid',   label:'Mín Asia',    col:'#C9A84C' },
+      { price: sEntry, cls:'red solid',    label:'🪤 SELL STOP',col:'#E05252' },
+      sTP  ? { price: sTP,    cls:'red dashed',   label:'🎯 TP Sell',  col:'#E05252' } : null,
+      { price: bSL,    cls:'red dashed',   label:'SL Buy',      col:'rgba(224,82,82,0.5)' },
+      { price: sSL,    cls:'green dashed', label:'SL Sell',     col:'rgba(76,175,125,0.5)' },
+    ].filter(Boolean);
+
+    lines.forEach(({ price, cls, label, col }) => {
+      const y = yPct(price);
+      const line = document.createElement('div');
+      line.className = `pc-line ${cls}`;
+      line.style.cssText = `top:${y}%;position:absolute;left:0;right:68px;`;
+      track.appendChild(line);
+
+      const pl = document.createElement('div');
+      pl.className = 'pc-price-label';
+      pl.style.top = y + '%';
+      pl.textContent = price.toFixed(5);
+      track.appendChild(pl);
+
+      const ll = document.createElement('div');
+      ll.className = 'pc-label';
+      ll.style.cssText = `top:${y}%;right:0;color:${col};`;
+      ll.textContent = label;
+      track.appendChild(ll);
+    });
+  }
+
+  compute();
+
+  // ---- FECHAS: indicador global + info por sección ----
+  (function(){
+    const pad=n=>String(n).padStart(2,'0');
+    function limaNow(){ const n=new Date(); return new Date(n.getTime()-5*3600000); }
+    function fmt(d){ return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth()+1)}/${d.getUTCFullYear()}`; }
+    const sd=document.getElementById('statusDate');
+    if(sd) sd.textContent='📅 '+fmt(limaNow());
+    document.querySelectorAll('.info-date').forEach(el=>{
+      const raw=el.getAttribute('data-date');
+      let dateObj;
+      if(raw==='today' || raw.startsWith('__')){ dateObj=limaNow(); }
+      else { const [y,m,d]=raw.split('-').map(Number); dateObj=new Date(Date.UTC(y,m-1,d)); }
+      const v=el.querySelector('.val'), t=el.querySelector('.tag');
+      if(v) v.textContent=fmt(dateObj);
+      if(t){
+        const diff=Math.floor((limaNow()-dateObj)/86400000);
+        if(diff<=0){ t.textContent='ACTUAL'; t.className='tag ok'; }
+        else { t.textContent='DESFASADO'; t.className='tag old'; }
+      }
+    });
+  })();
+
+</script>
+</body>
+</html>

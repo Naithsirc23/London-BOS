@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>London BOS · Box asiático</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#F5F5F5;color:#212121;font-family:'Roboto',sans-serif;min-height:100vh;padding:24px;display:flex;flex-direction:column;gap:20px;align-items:center;max-width:560px;margin:0 auto;}
+  .wrap{width:100%;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;background:#FFFFFF;border-radius:14px;padding:18px 24px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+  .topbar .t{font-size:18px;font-weight:900;color:#1B5E20;}
+  .topbar .t small{display:block;font-size:11px;font-weight:500;color:#757575;letter-spacing:1px;}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:#E8F5E9;color:#388E3C;font-size:14px;font-weight:700;padding:8px 14px;border-radius:30px;}
+  .pill .dot{width:10px;height:10px;border-radius:50%;background:#388E3C;}
+  .verdict{background:#388E3C;color:#FFFFFF;border-radius:16px;padding:28px 24px;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(0,0,0,0.18);}
+  .verdict .icon{font-size:46px;font-weight:900;line-height:1;}
+  .verdict .est{font-size:30px;font-weight:900;letter-spacing:1px;}
+  .verdict .sub{font-size:16px;font-weight:500;opacity:0.95;}
+  .card{background:#FFFFFF;border-radius:16px;padding:22px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+  .card h2{font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9E9E9E;margin-bottom:16px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  .box{border-radius:14px;padding:18px;text-align:center;background:#F5F5F5;}
+  .box .lab{font-size:12px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#757575;}
+  .box .val{font-size:26px;font-weight:900;margin-top:6px;color:#212121;}
+  .box.rango{background:#E8F5E9;}
+  .box.rango .val{color:#388E3C;font-size:34px;}
+  .bar{position:relative;height:18px;background:#EEEEEE;border-radius:9px;margin-top:16px;}
+  .bar .zona{position:absolute;top:0;height:100%;left:30%;width:50%;background:#C8E6C9;border-radius:9px;}
+  .bar .mark{position:absolute;top:-5px;width:6px;height:28px;background:#388E3C;border-radius:3px;left:35.3%;transform:translateX(-50%);}
+  .scale{display:flex;justify-content:space-between;font-size:12px;font-weight:500;color:#757575;margin-top:8px;}
+  .scale .ok{color:#388E3C;font-weight:700;}
+  .meta{display:flex;flex-direction:column;gap:10px;}
+  .meta .row{display:flex;justify-content:space-between;font-size:15px;padding:8px 0;border-bottom:1px solid #EEEEEE;}
+  .meta .row:last-child{border-bottom:none;}
+  .meta .k{color:#757575;font-weight:500;}
+  .meta .v{color:#212121;font-weight:700;}
+</style></head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="t">Box asiático en vivo<small>2026-07-16 · SESIÓN ASIÁTICA</small></div>
+      <span class="pill"><span class="dot"></span>IB OPERABLE</span>
+    </div>
+    <div class="verdict">
+      <div class="icon">✓</div>
+      <div class="est">OPERABLE</div>
+      <div class="sub">RANGO ASIÁTICO EUR/USD · 17.7 pips</div>
+    </div>
+    <div class="card">
+      <h2>Box asiático</h2>
+      <div class="grid">
+        <div class="box"><div class="lab">Techo</div><div class="val">1.14523</div></div>
+        <div class="box rango"><div class="lab">Rango</div><div class="val">17.7</div></div>
+        <div class="box"><div class="lab">Piso</div><div class="val">1.14346</div></div>
+      </div>
+      <div class="bar"><div class="zona"></div><div class="mark"></div></div>
+      <div class="scale"><span>0</span><span class="ok">zona 15–40 pips</span><span>50</span></div>
+    </div>
+    <div class="card">
+      <h2>Ventana</h2>
+      <div class="meta">
+        <div class="row"><span class="k">Inicio (Tokio)</span><span class="v">2026-07-16 19:00 Lima</span></div>
+        <div class="row"><span class="k">Fin (Londres)</span><span class="v">2026-07-17 02:00 Lima</span></div>
+        <div class="row"><span class="k">Barras 1m</span><span class="v">421</span></div>
+        <div class="row"><span class="k">Generado</span><span class="v">2026-07-17 11:36:04</span></div>
+      </div>
+    </div>
+  </div>
+</body></html>

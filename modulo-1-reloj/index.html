@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>London Breakout · Reloj</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black: #0A0A0A; --gold: #C9A84C; --gold-dim: rgba(201,168,76,0.15);
+    --paper: #E8E4DC; --green: #4CAF7D; --divider: rgba(201,168,76,0.18);
+  }
+  body { background: var(--black); color: var(--paper); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .status-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1px solid var(--divider); border-radius: 6px; }
+  .logo { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; }
+  .status-date { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: var(--gold); background: rgba(201,168,76,0.10); border: 1px solid rgba(201,168,76,0.3); padding: 3px 8px; border-radius: 3px; text-transform: uppercase; }
+  .info-date { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.08em; color: rgba(232,228,220,0.4); text-transform: none; display: inline-flex; align-items: center; gap: 6px; }
+  .info-date .val { color: var(--paper); font-weight: 700; }
+  .info-date .tag { font-size: 7px; font-weight: 700; padding: 1px 5px; border-radius: 2px; letter-spacing: 0.1em; }
+  .info-date .tag.ok { background: rgba(76,175,125,0.15); color: var(--green); border: 1px solid rgba(76,175,125,0.4); }
+  .info-date .tag.old { background: rgba(224,82,82,0.12); color: var(--red); border: 1px solid rgba(224,82,82,0.4); }
+  .pill { font-family: 'Space Mono', monospace; font-size: 9px; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .pill.asia { background: rgba(76,175,125,0.12); color: var(--green); border: 1px solid rgba(76,175,125,0.3); }
+  .pill.london { background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+  .pill.waiting { background: rgba(255,255,255,0.04); color: rgba(232,228,220,0.35); border: 1px solid var(--divider); }
+  .card-lima { border: 1px solid var(--divider); border-radius: 6px; padding: 20px 16px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .card-city { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.22em; color: var(--gold); text-transform: uppercase; }
+  .card-tz { font-family: 'Space Mono', monospace; font-size: 8px; color: rgba(232,228,220,0.3); margin-bottom: 8px; }
+  .big-time { font-family: 'Space Mono', monospace; font-size: 56px; font-weight: 700; line-height: 1; color: var(--paper); letter-spacing: -0.02em; }
+  .big-sec { font-family: 'Space Mono', monospace; font-size: 22px; color: var(--gold); vertical-align: super; margin-left: 3px; }
+  .card-date { font-size: 11px; color: rgba(232,228,220,0.35); margin-top: 4px; }
+  .sess-wrap { width: 100%; margin-top: 12px; }
+  .sess-label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.15em; color: rgba(232,228,220,0.3); text-transform: uppercase; margin-bottom: 5px; }
+  .sess-track { width: 100%; height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; }
+  .sess-fill { height: 100%; border-radius: 2px; transition: width 1s linear; }
+  .sess-name { font-family: 'Space Mono', monospace; font-size: 9px; margin-top: 5px; text-align: right; }
+  .trio { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .city-card { border: 1px solid var(--divider); border-radius: 6px; padding: 10px 8px; display: flex; flex-direction: column; gap: 4px; align-items: center; }
+  .city-card .dot { width: 6px; height: 6px; border-radius: 50%; margin-bottom: 2px; }
+  .dot-on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .dot-off { background: rgba(255,255,255,0.1); }
+  .city-card .c-name { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.12em; color: var(--gold); text-transform: uppercase; text-align: center; }
+  .city-card .c-time { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: var(--paper); line-height: 1; }
+.city-card .c-sec { font-size: 10px; color: var(--gold); }
+  .city-card .c-tz { font-size: 9px; color: rgba(232,228,220,0.25); text-align: center; }
+  .cd-card { border: 1px solid var(--gold-dim); border-radius: 6px; padding: 16px; background: rgba(201,168,76,0.04); display: flex; flex-direction: column; gap: 8px; }
+  .cd-header { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.18em; color: rgba(232,228,220,0.35); text-transform: uppercase; }
+  .cd-target { font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--gold); font-weight: 500; }
+  .cd-digits { display: flex; align-items: baseline; gap: 2px; }
+  .cd-unit { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+  .cd-num { font-family: 'Space Mono', monospace; font-size: 38px; font-weight: 700; color: var(--paper); line-height: 1; transition: color 0.5s; }
+  .cd-lbl { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.1em; color: rgba(232,228,220,0.3); text-transform: uppercase; }
+  .cd-sep { font-family: 'Space Mono', monospace; font-size: 28px; color: rgba(201,168,76,0.3); margin-bottom: 10px; }
+  .cd-note { font-size: 11px; color: rgba(232,228,220,0.4); line-height: 1.5; }
+  .hi { color: var(--gold); }
+  .urgent { color: var(--gold) !important; }
+  .imminent { color: var(--green) !important; animation: flick 0.7s infinite alternate; }
+  @keyframes flick { from { opacity:1; } to { opacity:0.5; } }
+  .pulse { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: p 2s infinite; }
+  @keyframes p { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+</style>
+</head>
+<body>
+<div class="status-bar">
+  <div class="logo">LB · Módulo 1</div>
+  <span class="status-date" id="statusDate">📅 --/--/----</span>
+  <div class="pill waiting" id="pill">…</div>
+  <span class="pulse"></span>
+</div>
+<div class="card-lima">
+  <div class="card-city" style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:10px;">Lima, Perú
+    <span class="info-date" data-date="today" style="font-size:8px;"><span class="val" id="infoDateVal">--/--/----</span><span class="tag"></span></span>
+  </div>
+  <div class="card-tz">GMT − 5:00</div>
+  <div class="big-time"><span id="lH">--</span>:<span id="lM">--</span><span class="big-sec" id="lS">--</span></div>
+  <div class="card-date" id="lDate">—</div>
+  <div class="sess-wrap">
+    <div class="sess-label">Sesión activa</div>
+    <div class="sess-track"><div class="sess-fill" id="sFill" style="width:0%"></div></div>
+    <div class="sess-name" id="sName">—</div>
+  </div>
+</div>
+<div class="trio">
+  <div class="city-card"><div class="dot dot-on" id="dGMT"></div><div class="c-name">GMT</div><div class="c-time"><span id="gH">--</span>:<span id="gM">--</span></div><div class="c-sec" id="gS">--</div><div class="c-tz">Universal</div></div>
+  <div class="city-card"><div class="dot" id="dLDN"></div><div class="c-name">Londres</div><div class="c-time"><span id="eH">--</span>:<span id="eM">--</span></div><div class="c-sec" id="eS">--</div><div class="c-tz">GMT+1</div></div>
+  <div class="city-card"><div class="dot" id="dTKY"></div><div class="c-name">Tokio</div><div class="c-time"><span id="tH">--</span>:<span id="tM">--</span></div><div class="c-sec" id="tS">--</div><div class="c-tz">GMT+9</div></div>
+</div>
+<div class="cd-card">
+  <div class="cd-header">⏱ Cuenta regresiva</div>
+  <div class="cd-target" id="cdTgt">—</div>
+  <div class="cd-digits">
+    <div class="cd-unit"><div class="cd-num" id="cdH">--</div><div class="cd-lbl">horas</div></div>
+    <div class="cd-sep">:</div>
+    <div class="cd-unit"><div class="cd-num" id="cdM">--</div><div class="cd-lbl">min</div></div>
+    <div class="cd-sep">:</div>
+    <div class="cd-unit"><div class="cd-num" id="cdS">--</div><div class="cd-lbl">seg</div></div>
+  </div>
+  <div class="cd-note" id="cdNote">—</div>
+</div>
+<script>
+  const pad = n => String(n).padStart(2,'0');
+  const DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+function sessInfo(gmtH,gmtM){const t=gmtH*60+gmtM;if(t<420)return{name:'Asia 🌏',pct:(t/420)*100,color:'#4CAF7D'};if(t<720)return{name:'Londres 🇬🇧',pct:((t-420)/300)*100,color:'#C9A84C'};if(t<960)return{name:'LDN + NY ⚡',pct:((t-720)/240)*100,color:'#E8A84C'};if(t<1260)return{name:'Nueva York 🇺🇸',pct:((t-960)/300)*100,color:'#7C9EC9'};return{name:'Pre-Asia',pct:0,color:'#444'};}
+  function nextEvent(gmtH,gmtM,gmtS){const sec=gmtH*3600+gmtM*60+gmtS,OPEN=7*3600,DAY=86400;if(sec<OPEN)return{secs:OPEN-sec,label:'Apertura Londres · 07:00 GMT',note:'🎯 En Lima serán las <span class="hi">02:00 AM</span> — momento de activar la estrategia'};return{secs:DAY-sec,label:'Próxima Asia · 00:00 GMT',note:'En Lima serán las <span class="hi">07:00 PM</span> — inicio del rango asiático'};}
+  function tick(){
+    const now=new Date(),gH=now.getUTCHours(),gM=now.getUTCMinutes(),gS=now.getUTCSeconds();
+    const lima=new Date(now.getTime()-5*3600000),lH=lima.getUTCHours(),lM=lima.getUTCMinutes(),lS=lima.getUTCSeconds();
+    const ldn=new Date(now.getTime()+1*3600000),eH=ldn.getUTCHours(),eM=ldn.getUTCMinutes(),eS=ldn.getUTCSeconds();
+    const tky=new Date(now.getTime()+9*3600000),tH=tky.getUTCHours(),tM=tky.getUTCMinutes(),tS=tky.getUTCSeconds();
+    document.getElementById('lH').textContent=pad(lH);document.getElementById('lM').textContent=pad(lM);document.getElementById('lS').textContent=pad(lS);
+    document.getElementById('lDate').textContent=`${DAYS[lima.getUTCDay()]} ${lima.getUTCDate()} ${MONTHS[lima.getUTCMonth()]} ${lima.getUTCFullYear()}`;
+    document.getElementById('gH').textContent=pad(gH);document.getElementById('gM').textContent=pad(gM);document.getElementById('gS').textContent=pad(gS);
+    document.getElementById('eH').textContent=pad(eH);document.getElementById('eM').textContent=pad(eM);document.getElementById('eS').textContent=pad(eS);
+    document.getElementById('tH').textContent=pad(tH);document.getElementById('tM').textContent=pad(tM);document.getElementById('tS').textContent=pad(tS);
+    const s=sessInfo(gH,gM),fill=document.getElementById('sFill');fill.style.width=s.pct.toFixed(1)+'%';fill.style.background=s.color;
+    const sn=document.getElementById('sName');sn.textContent=s.name;sn.style.color=s.color;
+    const inAsia=gH<7,inLDN=(gH>=7&&gH<16);
+    document.getElementById('dGMT').className='dot dot-on';
+    document.getElementById('dLDN').className='dot '+(inLDN?'dot-on':'dot-off');
+    document.getElementById('dTKY').className='dot '+(inAsia?'dot-on':'dot-off');
+    const pill=document.getElementById('pill');
+    if(inAsia){pill.textContent='🌏 Asia activa';pill.className='pill asia';}
+    else if(gH===7&&gM<5){pill.textContent='⚡ Londres abrió';pill.className='pill london';}
+    else if(inLDN){pill.textContent='🇬🇧 Londres';pill.className='pill london';}
+    else{pill.textContent='⏳ Esperando';pill.className='pill waiting';}
+    const ev=nextEvent(gH,gM,gS),hh=Math.floor(ev.secs/3600),mm=Math.floor((ev.secs%3600)/60),ss=ev.secs%60;
+    document.getElementById('cdTgt').textContent=ev.label;document.getElementById('cdNote').innerHTML=ev.note;
+    const cdH=document.getElementById('cdH'),cdM=document.getElementById('cdM'),cdS=document.getElementById('cdS');
+    cdH.textContent=pad(hh);cdM.textContent=pad(mm);cdS.textContent=pad(ss);
+    [cdH,cdM,cdS].forEach(el=>el.className='cd-num');
+    if(hh===0&&mm<30){cdM.classList.add('urgent');cdS.classList.add('urgent');}
+    if(hh===0&&mm<5){cdM.classList.add('imminent');cdS.classList.add('imminent');}
+  }
+  tick();setInterval(tick,1000);
+
+  // ---- FECHAS: indicador global + info por sección ----
+  (function(){
+    const pad=n=>String(n).padStart(2,'0');
+    function limaNow(){ const n=new Date(); return new Date(n.getTime()-5*3600000); }
+    function fmt(d){ return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth()+1)}/${d.getUTCFullYear()}`; }
+    const sd=document.getElementById('statusDate');
+    if(sd) sd.textContent='📅 '+fmt(limaNow());
+    document.querySelectorAll('.info-date').forEach(el=>{
+      const raw=el.getAttribute('data-date');
+      let dateObj = raw==='today' ? limaNow() : (()=>{const [y,m,d]=raw.split('-').map(Number); return new Date(Date.UTC(y,m-1,d));})();
+      const v=el.querySelector('.val'), t=el.querySelector('.tag');
+      if(v) v.textContent=fmt(dateObj);
+      if(t){
+        const diff=Math.floor((limaNow()-dateObj)/86400000);
+        if(diff<=0){ t.textContent='ACTUAL'; t.className='tag ok'; }
+        else { t.textContent='DESFASADO'; t.className='tag old'; }
+      }
+    });
+  })();
+
+</script>
+</body>
+</html>

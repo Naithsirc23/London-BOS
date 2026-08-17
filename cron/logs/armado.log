@@ -1,0 +1,272 @@
+API connection failed: ConnectionRefusedError(111, "Connect call failed ('127.0.0.1', 4001)")
+Make sure API port on TWS/IBG is open
+[IB] No se pudo conectar al gateway en puerto 4001: [Errno 111] Connect call failed ('127.0.0.1', 4001)
+[yfinance] Datos descargados (fallback).
+[ARMADO] Sin box, aborto.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-07-19 registrada en logger.
+🛠 <b>London BOS · Estrategia armada</b> · 2026-07-19
+📊 <b>London BOS</b> · 2026-07-19
+🟢 OPERABLE · Box EUR/USD
+Techo 1.14451 · Piso 1.14264
+Rango <b>18.7 pips</b>
+Filtro 15-40: DENTRO DE RANGO
+
+📌 <b>Niveles (RR 1.5:1)</b>
+🔼 Buy Stop: <b>1.14453</b>  SL 1.14264  TP 1.14738
+🔽 Sell Stop: <b>1.14262</b>  SL 1.14451  TP 1.13978
+
+⏰ Disparo en apertura Londres (02:00 Lima). Reporte 2:20 AM.
+[NOTIF] Mensaje enviado.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-07-20 registrada en logger.
+🔴 <b>London BOS · HOY NO OPERABLE</b> · 2026-07-20
+📊 Box EUR/USD
+Techo 1.14240 · Piso 1.14091
+Rango <b>14.9 pips</b>
+Filtro 15–40: DEMASIADO ESTRECHO (<15)
+
+⏸ Sin estrategia armada. No se opera hoy.
+[NOTIF] No se pudo enviar: <urlopen error [Errno 104] Connection reset by peer>
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-07-21 registrada en logger.
+🛠 <b>London BOS · Estrategia armada</b> · 2026-07-21
+📊 <b>London BOS</b> · 2026-07-21
+🟢 OPERABLE · Box EUR/USD
+Techo 1.14138 · Piso 1.13987
+Rango <b>15.0 pips</b>
+Filtro 15-40: DENTRO DE RANGO
+
+📌 <b>Niveles (RR 1.5:1)</b>
+🔼 Buy Stop: <b>1.14139</b>  SL 1.13987  TP 1.14367
+🔽 Sell Stop: <b>1.13986</b>  SL 1.14138  TP 1.13758
+
+⏰ Disparo en apertura Londres (02:00 Lima). Reporte 2:20 AM.
+[NOTIF] Mensaje enviado.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-07-22 registrada en logger.
+🛠 <b>London BOS · Estrategia armada</b> · 2026-07-22
+📊 <b>London BOS</b> · 2026-07-22
+🟢 OPERABLE · Box EUR/USD
+Techo 1.14356 · Piso 1.14105
+Rango <b>25.2 pips</b>
+Filtro 15-40: DENTRO DE RANGO
+
+📌 <b>Niveles (RR 1.5:1)</b>
+🔼 Buy Stop: <b>1.14358</b>  SL 1.14105  TP 1.14739
+🔽 Sell Stop: <b>1.14103</b>  SL 1.14356  TP 1.13723
+
+⏰ Disparo en apertura Londres (02:00 Lima). Reporte 2:20 AM.
+[NOTIF] Mensaje enviado.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-07-23 registrada en logger.
+🔴 <b>London BOS · HOY NO OPERABLE</b> · 2026-07-23
+📊 Box EUR/USD
+Techo 1.13876 · Piso 1.13752
+Rango <b>12.4 pips</b>
+Filtro 15–40: DEMASIADO ESTRECHO (<15)
+
+⏸ Sin estrategia armada. No se opera hoy.
+[NOTIF] No se pudo enviar: HTTP Error 400: Bad Request
+[IB] Datos descargados desde IB Gateway.
+[ARMADO] Sin box, aborto.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-07-29 registrada en logger.
+🛠 <b>London BOS · Estrategia armada</b> · 2026-07-29
+📊 <b>London BOS</b> · 2026-07-29
+🟢 OPERABLE · Box EUR/USD
+Techo 1.14681 · Piso 1.14433
+Rango <b>24.9 pips</b>
+Filtro 15-40: DENTRO DE RANGO
+
+📌 <b>Niveles (RR 1.5:1)</b>
+🔼 Buy Stop: <b>1.14683</b>  SL 1.14433  TP 1.15060
+🔽 Sell Stop: <b>1.14431</b>  SL 1.14681  TP 1.14054
+
+⏰ Disparo en apertura Londres (02:00 Lima). Reporte 2:20 AM.
+[NOTIF] Mensaje enviado.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-07-30 registrada en logger.
+🛠 <b>London BOS · Estrategia armada</b> · 2026-07-30
+📊 <b>London BOS</b> · 2026-07-30
+🟢 OPERABLE · Box EUR/USD
+Techo 1.15265 · Piso 1.15045
+Rango <b>22.1 pips</b>
+Filtro 15-40: DENTRO DE RANGO
+
+📌 <b>Niveles (RR 1.5:1)</b>
+🔼 Buy Stop: <b>1.15267</b>  SL 1.15045  TP 1.15601
+🔽 Sell Stop: <b>1.15043</b>  SL 1.15265  TP 1.14709
+
+⏰ Disparo en apertura Londres (02:00 Lima). Reporte 2:20 AM.
+[NOTIF] Mensaje enviado.
+[IB] Datos descargados desde IB Gateway.
+[ARMADO] Sin box, aborto.
+[IB] Datos descargados desde IB Gateway.
+[ARMADO] Sin box, aborto.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-08-02 registrada en logger.
+🛠 <b>London BOS · Estrategia armada</b> · 2026-08-02
+📊 <b>London BOS</b> · 2026-08-02
+🟢 OPERABLE · Box EUR/USD
+Techo 1.15562 · Piso 1.15237
+Rango <b>32.4 pips</b>
+Filtro 15-40: DENTRO DE RANGO
+
+📌 <b>Niveles (RR 1.5:1)</b>
+🔼 Buy Stop: <b>1.15563</b>  SL 1.15237  TP 1.16053
+🔽 Sell Stop: <b>1.15236</b>  SL 1.15562  TP 1.14746
+
+⏰ Disparo en apertura Londres (02:00 Lima). Reporte 2:20 AM.
+[NOTIF] Mensaje enviado.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-08-03 registrada en logger.
+🔴 <b>London BOS · HOY NO OPERABLE</b> · 2026-08-03
+📊 Box EUR/USD
+Techo 1.15151 · Piso 1.15023
+Rango <b>12.8 pips</b>
+Filtro 15–40: DEMASIADO ESTRECHO (<15)
+
+⏸ Sin estrategia armada. No se opera hoy.
+[NOTIF] No se pudo enviar: HTTP Error 400: Bad Request
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-08-04 registrada en logger.
+🛠 <b>London BOS · Estrategia armada</b> · 2026-08-04
+📊 <b>London BOS</b> · 2026-08-04
+🟢 OPERABLE · Box EUR/USD
+Techo 1.15458 · Piso 1.15267
+Rango <b>19.1 pips</b>
+Filtro 15-40: DENTRO DE RANGO
+
+📌 <b>Niveles (RR 1.5:1)</b>
+🔼 Buy Stop: <b>1.15460</b>  SL 1.15267  TP 1.15750
+🔽 Sell Stop: <b>1.15265</b>  SL 1.15458  TP 1.14976
+
+⏰ Disparo en apertura Londres (02:00 Lima). Reporte 2:20 AM.
+[NOTIF] Mensaje enviado.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-08-05 registrada en logger.
+🛠 <b>London BOS · Estrategia armada</b> · 2026-08-05
+📊 <b>London BOS</b> · 2026-08-05
+🟢 OPERABLE · Box EUR/USD
+Techo 1.15597 · Piso 1.15431
+Rango <b>16.6 pips</b>
+Filtro 15-40: DENTRO DE RANGO
+
+📌 <b>Niveles (RR 1.5:1)</b>
+🔼 Buy Stop: <b>1.15599</b>  SL 1.15431  TP 1.15851
+🔽 Sell Stop: <b>1.15430</b>  SL 1.15597  TP 1.15178
+
+⏰ Disparo en apertura Londres (02:00 Lima). Reporte 2:20 AM.
+[NOTIF] Mensaje enviado.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-08-06 registrada en logger.
+🔴 <b>London BOS · HOY NO OPERABLE</b> · 2026-08-06
+📊 Box EUR/USD
+Techo 1.15257 · Piso 1.15182
+Rango <b>7.5 pips</b>
+Filtro 15–40: DEMASIADO ESTRECHO (<15)
+
+⏸ Sin estrategia armada. No se opera hoy.
+[NOTIF] No se pudo enviar: HTTP Error 400: Bad Request
+[IB] Datos descargados desde IB Gateway.
+[ARMADO] Sin box, aborto.
+[IB] Datos descargados desde IB Gateway.
+[ARMADO] Sin box, aborto.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-08-09 registrada en logger.
+🔴 <b>London BOS · HOY NO OPERABLE</b> · 2026-08-09
+📊 Box EUR/USD
+Techo 1.15592 · Piso 1.15481
+Rango <b>11.1 pips</b>
+Filtro 15–40: DEMASIADO ESTRECHO (<15)
+
+⏸ Sin estrategia armada. No se opera hoy.
+[NOTIF] No se pudo enviar: HTTP Error 400: Bad Request
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-08-10 registrada en logger.
+🛠 <b>London BOS · Estrategia armada</b> · 2026-08-10
+📊 <b>London BOS</b> · 2026-08-10
+🟢 OPERABLE · Box EUR/USD
+Techo 1.15498 · Piso 1.15330
+Rango <b>16.8 pips</b>
+Filtro 15-40: DENTRO DE RANGO
+
+📌 <b>Niveles (RR 1.5:1)</b>
+🔼 Buy Stop: <b>1.15500</b>  SL 1.15330  TP 1.15755
+🔽 Sell Stop: <b>1.15328</b>  SL 1.15498  TP 1.15073
+
+⏰ Disparo en apertura Londres (02:00 Lima). Reporte 2:20 AM.
+[NOTIF] Mensaje enviado.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-08-11 registrada en logger.
+🔴 <b>London BOS · HOY NO OPERABLE</b> · 2026-08-11
+📊 Box EUR/USD
+Techo 1.15447 · Piso 1.15322
+Rango <b>12.5 pips</b>
+Filtro 15–40: DEMASIADO ESTRECHO (<15)
+
+⏸ Sin estrategia armada. No se opera hoy.
+[NOTIF] No se pudo enviar: HTTP Error 400: Bad Request
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-08-12 registrada en logger.
+🛠 <b>London BOS · Estrategia armada</b> · 2026-08-12
+📊 <b>London BOS</b> · 2026-08-12
+🟢 OPERABLE · Box EUR/USD
+Techo 1.15314 · Piso 1.15118
+Rango <b>19.5 pips</b>
+Filtro 15-40: DENTRO DE RANGO
+
+📌 <b>Niveles (RR 1.5:1)</b>
+🔼 Buy Stop: <b>1.15315</b>  SL 1.15118  TP 1.15611
+🔽 Sell Stop: <b>1.15116</b>  SL 1.15314  TP 1.14821
+
+⏰ Disparo en apertura Londres (02:00 Lima). Reporte 2:20 AM.
+[NOTIF] Mensaje enviado.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-08-13 registrada en logger.
+🔴 <b>London BOS · HOY NO OPERABLE</b> · 2026-08-13
+📊 Box EUR/USD
+Techo 1.15441 · Piso 1.15322
+Rango <b>12.0 pips</b>
+Filtro 15–40: DEMASIADO ESTRECHO (<15)
+
+⏸ Sin estrategia armada. No se opera hoy.
+[NOTIF] No se pudo enviar: HTTP Error 400: Bad Request
+[IB] Datos descargados desde IB Gateway.
+[ARMADO] Sin box, aborto.
+[IB] Datos descargados desde IB Gateway.
+[ARMADO] Sin box, aborto.
+[IB] Datos descargados desde IB Gateway.
+[HTML] Dashboard generado: index.html
+[LOG] Sesión 2026-08-16 registrada en logger.
+🛠 <b>London BOS · Estrategia armada</b> · 2026-08-16
+📊 <b>London BOS</b> · 2026-08-16
+🟢 OPERABLE · Box EUR/USD
+Techo 1.15942 · Piso 1.15738
+Rango <b>20.5 pips</b>
+Filtro 15-40: DENTRO DE RANGO
+
+📌 <b>Niveles (RR 1.5:1)</b>
+🔼 Buy Stop: <b>1.15944</b>  SL 1.15738  TP 1.16255
+🔽 Sell Stop: <b>1.15736</b>  SL 1.15942  TP 1.15425
+
+⏰ Disparo en apertura Londres (02:00 Lima). Reporte 2:20 AM.
+[NOTIF] Mensaje enviado.

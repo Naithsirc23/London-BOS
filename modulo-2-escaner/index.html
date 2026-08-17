@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>London BOS · Módulo 2 — Escáner</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black: #0A0A0A; --gold: #C9A84C; --gold-dim: rgba(201,168,76,0.15);
+    --paper: #E8E4DC; --green: #4CAF7D; --red: #E05252;
+    --divider: rgba(201,168,76,0.18); --gray: rgba(232,228,220,0.25);
+  }
+  body { background: var(--black); color: var(--paper); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  /* STATUS BAR */
+  .status-bar { display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; border: 1px solid var(--divider); border-radius: 6px; }
+  .logo { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; }
+  .status-date { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: var(--gold); background: rgba(201,168,76,0.10); border: 1px solid rgba(201,168,76,0.3); padding: 3px 8px; border-radius: 3px; text-transform: uppercase; }
+  .pill { font-family: 'Space Mono', monospace; font-size: 9px; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .pill.asia { background: rgba(76,175,125,0.12); color: var(--green); border: 1px solid rgba(76,175,125,0.3); }
+  .pill.closed { background: rgba(201,168,76,0.10); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+  .pill.waiting { background: rgba(255,255,255,0.04); color: var(--gray); border: 1px solid var(--divider); }
+  .pulse { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--green); animation: p 2s infinite; }
+  @keyframes p { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  /* HOY CARD */
+  .card { border: 1px solid var(--divider); border-radius: 6px; padding: 16px; }
+  .card-title { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .info-date { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.08em; color: var(--gray); text-transform: none; display: inline-flex; align-items: center; gap: 6px; }
+  .info-date .val { color: var(--paper); font-weight: 700; }
+  .info-date .tag { font-size: 7px; font-weight: 700; padding: 1px 5px; border-radius: 2px; letter-spacing: 0.1em; }
+  .info-date .tag.ok { background: rgba(76,175,125,0.15); color: var(--green); border: 1px solid rgba(76,175,125,0.4); }
+  .info-date .tag.old { background: rgba(224,82,82,0.12); color: var(--red); border: 1px solid rgba(224,82,82,0.4); }
+  .trio-nums { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .num-box { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .num-lbl { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.12em; color: var(--gray); text-transform: uppercase; }
+  .num-val { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; color: var(--paper); line-height: 1; }
+  .num-val.green { color: var(--green); }
+  .num-val.red { color: var(--red); }
+  .num-val.gold { color: var(--gold); }
+  .num-sub { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--gray); }
+  /* RANGE BAR */
+  .range-section { margin-top: 4px; }
+  .range-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .range-label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.12em; color: var(--gray); text-transform: uppercase; }
+  .range-verdict { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 3px; }
+  .verdict-ok { background: rgba(76,175,125,0.12); color: var(--green); border: 1px solid rgba(76,175,125,0.3); }
+  .verdict-low { background: rgba(224,82,82,0.10); color: var(--red); border: 1px solid rgba(224,82,82,0.3); }
+  .verdict-high { background: rgba(224,82,82,0.10); color: var(--red); border: 1px solid rgba(224,82,82,0.3); }
+  .range-track-wrap { position: relative; height: 28px; }
+  .range-track { position: absolute; top: 10px; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; }
+  .range-zone { position: absolute; top: 10px; height: 4px; background: rgba(76,175,125,0.25); border-radius: 2px; }
+  .range-pip-bar { position: absolute; top: 7px; height: 10px; border-radius: 2px; transition: all 0.6s ease; min-width: 3px; }
+  .range-pip-bar.ok { background: var(--green); }
+  .range-pip-bar.low { background: var(--red); }
+  .range-pip-bar.high { background: var(--red); }
+  .range-ticks { display: flex; justify-content: space-between; margin-top: 2px; }
+  .tick { font-family: 'Space Mono', monospace; font-size: 7px; color: var(--gray); }
+  .tick-mid { font-family: 'Space Mono', monospace; font-size: 7px; color: rgba(76,175,125,0.6); }
+  /* HISTORY */
+  .hist-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .hist-title { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; }
+  .hist-sub { font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--gray); }
+  .hist-row { display: grid; grid-template-columns: 60px 1fr 42px 42px 50px; gap: 6px; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(201,168,76,0.08); }
+  .hist-row:last-child { border-bottom: none; }
+  .hist-date { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--gray); }
+  .hist-bar-wrap { position: relative; height: 14px; }
+  .hist-track { position: absolute; top: 5px; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; }
+  .hist-zone { position: absolute; top: 5px; height: 4px; background: rgba(76,175,125,0.15); border-radius: 2px; }
+  .hist-fill { position: absolute; top: 3px; height: 8px; border-radius: 2px; }
+  .hist-fill.ok { background: rgba(76,175,125,0.7); }
+  .hist-fill.low { background: rgba(224,82,82,0.6); }
+  .hist-fill.high { background: rgba(224,82,82,0.6); }
+  .hist-pip { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; text-align: right; }
+  .hist-pip.ok { color: var(--green); }
+  .hist-pip.low { color: var(--red); }
+  .hist-pip.high { color: var(--red); }
+  .hist-verdict { font-family: 'Space Mono', monospace; font-size: 8px; text-align: center; }
+  .hist-verdict.ok { color: var(--green); }
+  .hist-verdict.low { color: var(--red); }
+  .hist-verdict.high { color: var(--red); }
+  .hist-hl { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--gray); text-align: right; line-height: 1.4; }
+  /* SEMANA SUMMARY */
+  .week-bar { display: flex; gap: 4px; margin-top: 10px; }
+  .week-day { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .week-dot { width: 100%; height: 5px; border-radius: 2px; }
+  .week-dot.ok { background: var(--green); }
+  .week-dot.low { background: var(--red); }
+  .week-dot.high { background: var(--red); }
+  .week-dot.none { background: rgba(255,255,255,0.06); }
+  .week-lbl { font-family: 'Space Mono', monospace; font-size: 7px; color: var(--gray); }
+</style>
+</head>
+<body>
+<div class="status-bar">
+  <div class="logo">LB · Módulo 2 — Escáner</div>
+  <span class="status-date" id="statusDate">📅 --/--/----</span>
+  <div class="pill closed" id="statusPill">Asia cerrada</div>
+  <span class="pulse"></span>
+</div>
+<!-- HOY -->
+<div class="card">
+  <div class="card-title">📡 Sesión Asia — Hoy
+    <span class="info-date" data-date="2026-07-19"><span class="val">--/--/----</span><span class="tag"></span></span>
+  </div>
+  <div class="trio-nums">
+    <div class="num-box">
+      <div class="num-lbl">Máximo</div>
+      <div class="num-val green" id="todayHigh">—</div>
+      <div class="num-sub">EUR/USD</div>
+    </div>
+    <div class="num-box">
+      <div class="num-lbl">Rango</div>
+      <div class="num-val gold" id="todayPips">—</div>
+      <div class="num-sub">pips</div>
+    </div>
+    <div class="num-box">
+      <div class="num-lbl">Mínimo</div>
+      <div class="num-val red" id="todayLow">—</div>
+      <div class="num-sub">EUR/USD</div>
+    </div>
+  </div>
+  <div class="range-section">
+    <div class="range-header">
+      <div class="range-label">Zona válida: 15 – 40 pips</div>
+      <div class="range-verdict" id="todayVerdict">—</div>
+    </div>
+    <div class="range-track-wrap">
+      <div class="range-track"></div>
+      <div class="range-zone" id="rangeZone"></div>
+      <div class="range-pip-bar ok" id="rangePipBar"></div>
+    </div>
+    <div class="range-ticks">
+      <span class="tick">0</span>
+      <span class="tick-mid">15</span>
+      <span class="tick-mid">40</span>
+      <span class="tick">60</span>
+    </div>
+  </div>
+</div>
+<!-- HISTORICO -->
+<div class="card">
+  <div class="hist-header">
+    <div class="hist-title">📅 Últimos días</div>
+    <span class="info-date" data-date="2026-07-11"><span class="val">--/--/----</span><span class="tag"></span></span>
+    <div class="hist-sub" id="weekSummary">—</div>
+  </div>
+  <div id="histRows"></div>
+  <div class="week-bar" id="weekBar"></div>
+</div>
+<script>
+  // ── DATOS SIMULADOS (reemplazar con yfinance en producción) ──
+  // Datos realistas de EUR/USD sesión asiática última semana
+  const history = [
+    { date: "Lun 07", high: 1.08420, low: 1.08195, pips: 22.5 },
+    { date: "Mar 08", high: 1.08310, low: 1.08290, pips: 2.0 },   // muy pequeño
+    { date: "Mié 09", high: 1.08580, low: 1.08120, pips: 46.0 },  // muy grande
+    { date: "Jue 10", high: 1.08450, low: 1.08210, pips: 24.0 },
+    { date: "Vie 11", high: 1.08390, low: 1.08220, pips: 17.0 },
+  ];
+  const today = { date: "Hoy", high: 1.08475, low: 1.08230, pips: 24.5 };
+  const MAX_PIPS = 60;
+  function classify(pips) {
+    if (pips < 15) return { cls: "low", label: "❌ Muy estrecho" };
+    if (pips > 40) return { cls: "high", label: "❌ Muy amplio" };
+    return { cls: "ok", label: "✅ Operable" };
+  }
+  function pct(pips) { return Math.min((pips / MAX_PIPS) * 100, 100); }
+  // ── HOY ──
+  function renderToday() {
+    const { high, low, pips } = today;
+    const { cls, label } = classify(pips);
+    document.getElementById('todayHigh').textContent = high.toFixed(5);
+    document.getElementById('todayLow').textContent = low.toFixed(5);
+    document.getElementById('todayPips').textContent = pips.toFixed(1);
+    const verd = document.getElementById('todayVerdict');
+    verd.textContent = label;
+    verd.className = `range-verdict verdict-${cls}`;
+    // zona válida 15–40 sobre 0–60
+    const zoneLeft = (15/MAX_PIPS)*100;
+    const zoneWidth = ((40-15)/MAX_PIPS)*100;
+    document.getElementById('rangeZone').style.cssText = `left:${zoneLeft}%;width:${zoneWidth}%;top:10px;height:4px;position:absolute;`;
+    // barra de pips actual
+    const barWidth = Math.max(pct(pips), 2);
+    const bar = document.getElementById('rangePipBar');
+    bar.style.left = '0';
+    bar.style.width = barWidth + '%';
+    bar.className = `range-pip-bar ${cls}`;
+    // status pill
+    const now = new Date();
+    const gmtH = now.getUTCHours();
+    const pill = document.getElementById('statusPill');
+    if (gmtH < 7) { pill.textContent = '🌏 Asia activa'; pill.className = 'pill asia'; }
+    else { pill.textContent = '✅ Asia cerrada'; pill.className = 'pill closed'; }
+  }
+  // ── HISTÓRICO ──
+  function renderHistory() {
+    const container = document.getElementById('histRows');
+    container.innerHTML = '';
+    const zoneLeft = (15/MAX_PIPS)*100;
+    const zoneWidth = ((40-15)/MAX_PIPS)*100;
+    history.forEach(d => {
+      const { cls } = classify(d.pips);
+      const barW = Math.max(pct(d.pips), 2);
+      const row = document.createElement('div');
+      row.className = 'hist-row';
+      row.innerHTML = `<div class="hist-date">${d.date}</div> <div class="hist-bar-wrap"> <div class="hist-track"></div> <div class="hist-zone" style="left:${zoneLeft}%;width:${zoneWidth}%;top:5px;height:4px;position:absolute;border-radius:2px;"></div> <div class="hist-fill ${cls}" style="left:0;width:${barW}%;position:absolute;border-radius:2px;"></div> </div> <div class="hist-pip ${cls}">${d.pips.toFixed(1)}</div> <div class="hist-verdict ${cls}">${cls==='ok'?'✅':'❌'}</div> <div class="hist-hl">${d.high.toFixed(4)}<br>${d.low.toFixed(4)}</div>`;
+      container.appendChild(row);
+    });
+    // semana dots
+    const weekBar = document.getElementById('weekBar');
+    weekBar.innerHTML = '';
+    const allDays = [...history, { ...today, date: 'Hoy' }];
+    allDays.forEach(d => {
+      const { cls } = classify(d.pips);
+      const div = document.createElement('div');
+      div.className = 'week-day';
+      div.innerHTML = `<div class="week-dot ${cls}"></div><div class="week-lbl">${d.date.split(' ')[0]}</div>`;
+      weekBar.appendChild(div);
+    });
+    // resumen semana
+    const operables = allDays.filter(d => classify(d.pips).cls === 'ok').length;
+    document.getElementById('weekSummary').textContent = `${operables}/${allDays.length} días operables`;
+  }
+  renderToday();
+  renderHistory();
+
+  // ---- FECHAS: indicador global + info por sección ----
+  (function(){
+    const pad=n=>String(n).padStart(2,'0');
+    function limaNow(){ const n=new Date(); return new Date(n.getTime()-5*3600000); }
+    function fmt(d){ return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth()+1)}/${d.getUTCFullYear()}`; }
+    const sd=document.getElementById('statusDate');
+    if(sd) sd.textContent='📅 '+fmt(limaNow());
+    document.querySelectorAll('.info-date').forEach(el=>{
+      const raw=el.getAttribute('data-date');
+      let dateObj;
+      if(raw==='today' || raw.startsWith('__')){ dateObj=limaNow(); }
+      else { const [y,m,d]=raw.split('-').map(Number); dateObj=new Date(Date.UTC(y,m-1,d)); }
+      const v=el.querySelector('.val'), t=el.querySelector('.tag');
+      if(v) v.textContent=fmt(dateObj);
+      if(t){
+        const diff=Math.floor((limaNow()-dateObj)/86400000);
+        if(diff<=0){ t.textContent='ACTUAL'; t.className='tag ok'; }
+        else { t.textContent='DESFASADO'; t.className='tag old'; }
+      }
+    });
+  })();
+
+</script>
+</body>
+</html>

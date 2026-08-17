@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>London BOS · Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#F5F5F5;color:#212121;font-family:'Roboto',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+  /* NAV */
+  .nav{position:sticky;top:0;z-index:10;background:#FFFFFF;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:10px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .nav .brand{font-size:18px;font-weight:900;color:#1B5E20;letter-spacing:0.5px;margin-right:6px;}
+  .nav .nav-date{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:#E8F5E9;color:#1B5E20;font-weight:700;font-size:13px;padding:6px 12px;border-radius:20px;font-variant-numeric:tabular-nums;}
+  .nav .nav-date .cal{font-size:14px;}
+  .nav a{text-decoration:none;}
+  .navbtn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:70px;padding:8px 10px;border-radius:12px;background:#F5F5F5;color:#424242;font-weight:700;font-size:13px;line-height:1.1;transition:all .15s;border:1px solid transparent;cursor:pointer;}
+  .navbtn .n{font-size:10px;font-weight:500;color:#9E9E9E;letter-spacing:0.5px;}
+  .navbtn:hover{background:#E8F5E9;color:#1B5E20;}
+  .navbtn.active{background:#1B5E20;color:#FFFFFF;}
+  .navbtn.active .n{color:#C8E6C9;}
+  .navbtn.disabled{opacity:0.4;cursor:default;}
+  /* LAYOUT */
+  .wrap{padding:24px;display:flex;flex-direction:column;gap:20px;max-width:960px;width:100%;margin:0 auto;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;background:#FFFFFF;border-radius:14px;padding:18px 24px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+  .topbar .t{font-size:20px;font-weight:900;color:#1B5E20;}
+  .topbar .t small{display:block;font-size:12px;font-weight:500;color:#757575;letter-spacing:1px;}
+  .pill{display:inline-flex;align-items:center;gap:10px;background:#E8F5E9;color:#388E3C;font-size:16px;font-weight:700;padding:9px 16px;border-radius:30px;}
+  .pill .dot{width:11px;height:11px;border-radius:50%;background:#388E3C;}
+  .pill.red{background:#FFEBEE;color:#D32F2F;}
+  .pill.red .dot{background:#D32F2F;}
+  .card{background:#FFFFFF;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+  .card h2{font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9E9E9E;margin-bottom:18px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+  .box{border-radius:14px;padding:20px;text-align:center;background:#F5F5F5;}
+  .box .lab{font-size:13px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#757575;}
+  .box .val{font-size:28px;font-weight:900;margin-top:8px;color:#212121;}
+  .box.rango{background:#E8F5E9;}
+  .box.rango .val{color:#388E3C;font-size:36px;}
+  .bar{position:relative;height:18px;background:#EEEEEE;border-radius:9px;margin-top:18px;}
+  .bar .zona{position:absolute;top:0;height:100%;left:30%;width:50%;background:#C8E6C9;border-radius:9px;}
+  .bar .mark{position:absolute;top:-5px;width:6px;height:28px;background:#388E3C;border-radius:3px;left:35.4%;transform:translateX(-50%);}
+  .scale{display:flex;justify-content:space-between;font-size:13px;font-weight:500;color:#757575;margin-top:8px;}
+  .scale .ok{color:#388E3C;font-weight:700;}
+  .meta{display:flex;flex-direction:column;gap:12px;}
+  .meta .row{display:flex;justify-content:space-between;font-size:16px;padding:10px 0;border-bottom:1px solid #EEEEEE;}
+  .meta .row:last-child{border-bottom:none;}
+  .meta .k{color:#757575;font-weight:500;}
+  .meta .v{color:#212121;font-weight:700;}
+  .verdict{background:#388E3C;color:#FFFFFF;border-radius:16px;padding:30px 24px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 4px 14px rgba(0,0,0,0.18);}
+  .verdict.red{background:#D32F2F;}
+  .verdict .icon{font-size:50px;font-weight:900;line-height:1;}
+  .verdict .est{font-size:32px;font-weight:900;letter-spacing:1px;}
+  .verdict .sub{font-size:17px;font-weight:500;opacity:0.95;}
+  .note{font-size:13px;color:#9E9E9E;text-align:center;}
+  .hidden{display:none !important;}
+  /* M1 reloj */
+  .clock-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  .clock{border-radius:14px;padding:18px;text-align:center;background:#F5F5F5;}
+  .clock .city{font-size:13px;font-weight:700;color:#1B5E20;letter-spacing:1px;text-transform:uppercase;}
+  .clock .time{font-size:32px;font-weight:900;margin-top:6px;}
+  .clock .tz{font-size:11px;color:#757575;margin-top:2px;}
+  .clock .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#9E9E9E;margin-bottom:6px;}
+  .clock .dot.on{background:#388E3C;box-shadow:0 0 6px #388E3C;}
+  .cd{background:#1B5E20;color:#FFF;border-radius:16px;padding:24px;text-align:center;margin-top:4px;}
+  .cd .lbl{font-size:13px;font-weight:500;opacity:0.85;}
+  .cd .nums{font-size:44px;font-weight:900;letter-spacing:2px;margin-top:6px;}
+  .cd .tgt{font-size:14px;margin-top:8px;opacity:0.9;}
+  /* M3 filtro */
+  .filt-input{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .filt-input label{font-size:14px;font-weight:500;color:#757575;}
+  .filt-input input{font-family:'Roboto';font-size:26px;font-weight:900;width:120px;text-align:center;border:2px solid #E0E0E0;border-radius:8px;padding:6px;outline:none;color:#212121;}
+  .filt-input input:focus{border-color:#388E3C;}
+  .filtrange{position:relative;height:24px;background:#EEEEEE;border-radius:12px;margin-top:10px;}
+  .filtrange .z{position:absolute;top:0;height:100%;left:25%;width:41.6%;background:#C8E6C9;border-radius:12px;}
+  .filtrange .m{position:absolute;top:-6px;width:6px;height:36px;background:#388E3C;border-radius:3px;transform:translateX(-50%);}
+  .filticks{display:flex;justify-content:space-between;font-size:12px;color:#757575;margin-top:6px;}
+  .logrow{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #EEEEEE;font-size:15px;}
+  .logrow:last-child{border-bottom:none;}
+  .pass{color:#388E3C;font-weight:700;}
+  .fail{color:#D32F2F;font-weight:700;}
+  /* M4 órdenes */
+  .o-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .o-card{border-radius:14px;padding:18px;background:#F5F5F5;}
+  .o-card.buy{border:2px solid #A5D6A7;}
+  .o-card.sell{border:2px solid #EF9A9A;}
+  .o-card .h{font-size:15px;font-weight:900;margin-bottom:10px;}
+  .o-card.buy .h{color:#388E3C;}
+  .o-card.sell .h{color:#D32F2F;}
+  .o-card .r{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;}
+  .o-card .r .k{color:#757575;}
+  .o-card .r .v{font-weight:700;}
+  .o-card .v.sl{color:#D32F2F;}
+  .o-card .v.tp{color:#388E3C;}
+  .o-in{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+  .o-in .b{display:flex;flex-direction:column;gap:4px;}
+  .o-in label{font-size:12px;color:#757575;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;}
+  .o-in input{font-family:'Roboto';font-size:16px;font-weight:700;border:2px solid #E0E0E0;border-radius:8px;padding:8px;outline:none;color:#212121;}
+  .o-in input:focus{border-color:#388E3C;}
+  .modes{display:flex;gap:10px;margin-bottom:14px;}
+  .mode{flex:1;text-align:center;padding:12px;border-radius:12px;background:#F5F5F5;border:2px solid transparent;cursor:pointer;font-weight:700;font-size:13px;color:#424242;}
+  .mode.active{background:#E8F5E9;border-color:#388E3C;color:#1B5E20;}
+  .mode .d{font-size:11px;font-weight:400;color:#757575;margin-top:4px;}
+  .soon{text-align:center;padding:60px 20px;color:#9E9E9E;}
+  .soon .big{font-size:48px;}
+  .soon .t{font-size:18px;font-weight:700;margin-top:10px;color:#757575;}
+  /* M5 GESTOR */
+  .g-in{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;}
+  .g-in .b{display:flex;flex-direction:column;gap:4px;}
+  .g-in label{font-size:12px;color:#757575;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;}
+  .g-in input{font-family:'Roboto';font-size:15px;font-weight:700;border:2px solid #E0E0E0;border-radius:8px;padding:8px;outline:none;color:#212121;}
+  .g-in input:focus{border-color:#388E3C;}
+  .g-dir{display:flex;gap:10px;margin-bottom:14px;}
+  .g-dir .mode{flex:1;}
+  .g-price{margin-bottom:14px;}
+  .g-price label{font-size:12px;color:#757575;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;}
+  .g-price input[type=range]{width:100%;accent-color:#1B5E20;height:6px;}
+  .g-price .pv{font-size:22px;font-weight:900;color:#1B5E20;text-align:center;margin-top:6px;}
+  .g-steps{display:flex;flex-direction:column;gap:10px;}
+  .g-step{border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;background:#F5F5F5;border-left:5px solid #BDBDBD;}
+  .g-step.done{background:#E8F5E9;border-left-color:#388E3C;}
+  .g-step.active{background:#FFF8E1;border-left-color:#F9A825;}
+  .g-step .num{font-size:22px;font-weight:900;color:#9E9E9E;min-width:28px;}
+  .g-step.done .num{color:#388E3C;}
+  .g-step.active .num{color:#F9A825;}
+  .g-step .body .t{font-size:15px;font-weight:700;color:#212121;}
+  .g-step .body .d{font-size:12px;color:#757575;margin-top:2px;}
+  .g-status{margin-top:14px;padding:16px;border-radius:12px;text-align:center;font-size:16px;font-weight:700;}
+  .g-status.open{background:#E3F2FD;color:#1565C0;}
+  .g-status.be{background:#E8F5E9;color:#388E3C;}
+  .g-status.partial{background:#FFF8E1;color:#F57F17;}
+  .g-status.trail{background:#F3E5F5;color:#7B1FA2;}
+  .g-status.closed{background:#EEEEEE;color:#616161;}
+  /* M6 NOTIF */
+  .chk{display:flex;align-items:center;gap:10px;font-size:15px;color:#212121;padding:10px 0;border-bottom:1px solid #EEEEEE;cursor:pointer;}
+  .chk:last-child{border-bottom:none;}
+  .chk input{width:18px;height:18px;accent-color:#1B5E20;}
+  .msg-preview{background:#212121;color:#E8F5E9;border-radius:12px;padding:16px;font-family:'Roboto',monospace;font-size:14px;line-height:1.6;white-space:pre-wrap;}
+  .btn-primary{background:#1B5E20;color:#FFF;border:none;border-radius:10px;padding:12px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Roboto';}
+  .btn-primary:hover{background:#2E7D32;}
+  /* M7 LOGGER */
+  .tbl{display:flex;flex-direction:column;gap:6px;}
+  .tbl-row{display:grid;grid-template-columns:90px 1fr 1fr 80px 70px;gap:8px;padding:10px;border-radius:8px;background:#F5F5F5;font-size:13px;align-items:center;}
+  .tbl-row.head{background:#E8F5E9;font-weight:700;color:#1B5E20;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;}
+  .tbl-row .op{font-weight:700;text-align:center;}
+  .tbl-row .op.y{color:#388E3C;}
+  .tbl-row .op.n{color:#D32F2F;}
+  .tbl-row .rpt{font-size:12px;color:#1565C0;font-weight:600;padding:0 4px;}
+  /* M1 DUAL */
+  .dual{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .dual-card{border-radius:14px;padding:18px;color:#FFF;}
+  .dual-card.asia{background:linear-gradient(135deg,#1565C0,#0D47A1);}
+  .dual-card.ldn{background:linear-gradient(135deg,#1B5E20,#2E7D32);}
+  .dual-head{font-size:13px;font-weight:700;letter-spacing:1px;opacity:0.9;margin-bottom:8px;}
+  .clock-row{display:flex;flex-direction:column;align-items:flex-start;}
+  .big-clock{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .dual-card .tz{font-size:12px;opacity:0.85;margin-top:2px;}
+  .dual-card .cd{margin-top:16px;background:rgba(255,255,255,0.15);border-radius:10px;padding:12px;}
+  .dual-card .cd .lbl{font-size:12px;opacity:0.9;margin-bottom:4px;}
+  .dual-card .cd .nums{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;}
+  @media(max-width:640px){.dual{grid-template-columns:1fr;}}
+  /* FECHA INFO POR MÓDULO */
+  .info-date{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:#616161;margin-top:4px;}
+  .info-date .lbl{text-transform:uppercase;letter-spacing:0.5px;font-size:10px;color:#9E9E9E;}
+  .info-date .val{font-weight:700;color:#212121;font-variant-numeric:tabular-nums;}
+  .info-date .tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:0.5px;}
+  .info-date .tag.ok{background:#E8F5E9;color:#388E3C;}
+  .info-date .tag.old{background:#FFEBEE;color:#D32F2F;}
+  .topbar .info-date{margin-left:auto;}
+  .card h2{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+</style></head>
+<body>
+  <nav class="nav">
+    <span class="brand">London BOS</span>
+    <span class="nav-date"><span class="cal">📅</span><span id="navDateText">__HOY__</span></span>
+    <div class="navbtn active" data-view="dash"><span>Dashboard</span><span class="n">M2+M3</span></div>
+    <div class="navbtn" data-view="m1"><span>Reloj</span><span class="n">MÓDULO 1</span></div>
+    <div class="navbtn" data-view="m2"><span>Escáner</span><span class="n">MÓDULO 2</span></div>
+    <div class="navbtn" data-view="m3"><span>Filtro</span><span class="n">MÓDULO 3</span></div>
+    <div class="navbtn" data-view="m4"><span>Órdenes</span><span class="n">MÓDULO 4</span></div>
+    <div class="navbtn" data-view="m5"><span>Gestor</span><span class="n">MÓDULO 5</span></div>
+    <div class="navbtn" data-view="m6"><span>Notif.</span><span class="n">MÓDULO 6</span></div>
+    <div class="navbtn" data-view="m7"><span>Logger</span><span class="n">MÓDULO 7</span></div>
+  </nav>
+
+  <div class="wrap">
+    <!-- ============ DASHBOARD (M2+M3) ============ -->
+    <section id="view-dash">
+      <div class="topbar">
+        <div class="t">Dashboard central<small>__FECHA__ · SESIÓN ASIÁTICA</small></div>
+        <span class="info-date" data-date="__FECHA__"><span class="lbl">Info:</span><span class="val">--/--/----</span><span class="tag"></span></span>
+        <span class="pill __PILLCLS__"><span class="dot"></span>IB __ESTADO__</span>
+      </div>
+      <div class="verdict __VRED__">
+        <div class="icon">__ICONO__</div>
+        <div class="est">__ESTADO__</div>
+        <div class="sub">RANGO ASIÁTICO EUR/USD · __RANGO__ pips</div>
+      </div>
+      <div class="card">
+        <h2>Box asiático (Módulo 2 · Escáner)</h2>
+        <div class="grid">
+          <div class="box"><div class="lab">Techo</div><div class="val">__MAX__</div></div>
+          <div class="box rango"><div class="lab">Rango</div><div class="val">__RANGO__</div></div>
+          <div class="box"><div class="lab">Piso</div><div class="val">__MIN__</div></div>
+        </div>
+        <div class="bar"><div class="zona"></div><div class="mark" style="left:__POS__%"></div></div>
+        <div class="scale"><span>0</span><span class="ok">zona 15–40 pips</span><span>50</span></div>
+      </div>
+      <div class="card">
+        <h2>Ventana (Módulo 3 · Filtro)</h2>
+        <div class="meta">
+          <div class="row"><span class="k">Inicio (Tokio)</span><span class="v">__INI__ Lima</span></div>
+          <div class="row"><span class="k">Fin (Londres)</span><span class="v">__FIN__ Lima</span></div>
+          <div class="row"><span class="k">Barras 1m</span><span class="v">__NBAR__</span></div>
+          <div class="row"><span class="k">Filtro 15–40 pips</span><span class="v" style="color:__COLOR__">__DENTRO__</span></div>
+          <div class="row"><span class="k">Generado</span><span class="v">__GEN__</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ M1 RELOJ ============ -->
+    <section id="view-m1" class="hidden">
+      <div class="topbar"><div class="t">Módulo 1 · Reloj<small>CUENTAS REGRESIVA EN PARALELO</small></div><span class="info-date" data-date="today"><span class="lbl">Info:</span><span class="val">--/--/----</span><span class="tag"></span></span></div>
+      <div class="dual">
+        <div class="dual-card asia">
+          <div class="dual-head">🌏 ASIA · Tokio</div>
+          <div class="clock-row">
+            <div class="big-clock" id="tTKY">--:--:--</div>
+            <div class="tz">GMT+9 · inicio 19:00 Lima</div>
+          </div>
+          <div class="cd">
+            <div class="lbl">Falta para inicio de sesión asiática</div>
+            <div class="nums" id="cdAsia">--:--:--</div>
+          </div>
+        </div>
+        <div class="dual-card ldn">
+          <div class="dual-head">🇬🇧 LONDRES</div>
+          <div class="clock-row">
+            <div class="big-clock" id="tLDN">--:--:--</div>
+            <div class="tz">GMT+1 · apertura 02:00 Lima</div>
+          </div>
+          <div class="cd">
+            <div class="lbl">Falta para apertura de Londres</div>
+            <div class="nums" id="cdLdn">--:--:--</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h2>Hora local Lima (referencia)</h2>
+        <div class="clock-grid">
+          <div class="clock"><div class="dot on" id="dLIMA"></div><div class="city">Lima</div><div class="time" id="tLIMA">--:--:--</div><div class="tz">GMT-5</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ M2 ESCÁNER ============ -->
+    <section id="view-m2" class="hidden">
+      <div class="topbar"><div class="t">Módulo 2 · Escáner<small>BOX ASIÁTICO</small></div><span class="info-date" data-date="__FECHA__"><span class="lbl">Info:</span><span class="val">--/--/----</span><span class="tag"></span></span></div>
+      <div class="card">
+        <h2>Box asiático actual</h2>
+        <div class="grid">
+          <div class="box"><div class="lab">Techo</div><div class="val" id="sMax">__MAX__</div></div>
+          <div class="box rango"><div class="lab">Rango</div><div class="val" id="sRango">__RANGO__</div></div>
+          <div class="box"><div class="lab">Piso</div><div class="val" id="sMin">__MIN__</div></div>
+        </div>
+        <div class="bar"><div class="zona"></div><div class="mark" style="left:__POS__%"></div></div>
+        <div class="scale"><span>0</span><span class="ok">zona 15–40 pips</span><span>50</span></div>
+      </div>
+      <p class="note">Datos del último box generado por fx_session.py (IB Gateway). Regenera para actualizar.</p>
+    </section>
+
+    <!-- ============ M3 FILTRO ============ -->
+    <section id="view-m3" class="hidden">
+      <div class="topbar"><div class="t">Módulo 3 · Filtro<small>VALIDACIÓN 15–40 PIPS</small></div><span class="info-date" data-date="today"><span class="lbl">Info:</span><span class="val">--/--/----</span><span class="tag"></span></span></div>
+      <div class="card">
+        <h2>Ingresa el rango asiático</h2>
+        <div class="filt-input">
+          <label>Rango</label>
+          <input type="number" id="fPips" value="__RANGO__" min="0" max="60" step="0.5">
+          <span style="font-size:15px;color:#757575;">pips</span>
+        </div>
+        <div class="filtrange"><div class="z"></div><div class="m" id="fMark" style="left:__POS__%"></div></div>
+        <div class="filticks"><span>0</span><span style="color:#388E3C">15</span><span style="color:#388E3C">40</span><span>60</span></div>
+      </div>
+      <div class="verdict" id="fVerdict"><div class="icon">__ICONO__</div><div class="est">__ESTADO__</div><div class="sub">__DENTRO__</div></div>
+      <div class="card" style="margin-top:16px;">
+        <h2>Lógica de decisión</h2>
+        <div class="logrow"><span>¿Rango ≥ 15 pips?</span><span id="fLogMin">—</span></div>
+        <div class="logrow"><span>¿Rango ≤ 40 pips?</span><span id="fLogMax">—</span></div>
+        <div class="logrow"><span>Veredicto final</span><span id="fLogFin">—</span></div>
+      </div>
+    </section>
+
+    <!-- ============ M4 ÓRDENES ============ -->
+    <section id="view-m4" class="hidden">
+      <div class="topbar"><div class="t">Módulo 4 · Órdenes<small>BUY/SELL STOP</small></div><span class="info-date" data-date="__FECHA__"><span class="lbl">Info:</span><span class="val">--/--/----</span><span class="tag"></span></span></div>
+      <div class="card">
+        <h2>Datos del box asiático</h2>
+        <div class="o-in">
+          <div class="b"><label>Máximo asiático</label><input type="number" id="oHigh" value="__MAX__" step="0.00001"></div>
+          <div class="b"><label>Mínimo asiático</label><input type="number" id="oLow" value="__MIN__" step="0.00001"></div>
+        </div>
+        <div class="note" id="oPips" style="text-align:left;margin-bottom:8px;">Rango: __RANGO__ pips</div>
+      </div>
+      <div class="card">
+        <h2>Modo TP / SL</h2>
+        <div class="modes">
+          <div class="mode active" data-mode="fixed">Fijo<span class="d">TP=1×rango, SL=extremo</span></div>
+          <div class="mode" data-mode="manual">Manual<span class="d">Tú defines SL y R:R</span></div>
+          <div class="mode" data-mode="trailing">Trailing<span class="d">SL sigue al precio</span></div>
+        </div>
+        <div class="o-in" id="oManual" style="display:none;">
+          <div class="b"><label>SL (pips)</label><input type="number" id="oSL" value="25" step="1"></div>
+          <div class="b"><label>Ratio R:R</label><input type="number" id="oRR" value="1.5" step="0.1"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Órdenes calculadas</h2>
+        <div class="o-grid">
+          <div class="o-card buy"><div class="h">🟢 BUY STOP</div>
+            <div class="r"><span class="k">Entrada</span><span class="v" id="bE">—</span></div>
+            <div class="r"><span class="k">Stop Loss</span><span class="v sl" id="bS">—</span></div>
+            <div class="r"><span class="k">Take Profit</span><span class="v tp" id="bT">—</span></div>
+            <div class="r"><span class="k">R:R</span><span class="v" id="bR">—</span></div>
+          </div>
+          <div class="o-card sell"><div class="h">🔴 SELL STOP</div>
+            <div class="r"><span class="k">Entrada</span><span class="v" id="sE">—</span></div>
+            <div class="r"><span class="k">Stop Loss</span><span class="v sl" id="sS">—</span></div>
+            <div class="r"><span class="k">Take Profit</span><span class="v tp" id="sT">—</span></div>
+            <div class="r"><span class="k">R:R</span><span class="v" id="sR">—</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ M5 GESTOR DE SALIDA ============ -->
+    <section id="view-m5" class="hidden">
+      <div class="topbar"><div class="t">Módulo 5 · Gestor de salida<small>SIMULADOR · BREAKEVEN + PARCIAL + TRAILING</small></div><span class="info-date" data-date="today"><span class="lbl">Info:</span><span class="val">--/--/----</span><span class="tag"></span></span></div>
+      <div class="card">
+        <h2>Parámetros de la operación</h2>
+        <div class="g-dir">
+          <div class="mode active" data-dir="buy">🟢 BUY (long)<span class="d">Ruptura al alza</span></div>
+          <div class="mode" data-dir="sell">🔴 SELL (short)<span class="d">Ruptura a la baja</span></div>
+        </div>
+        <div class="g-in">
+          <div class="b"><label>Entry</label><input type="number" id="gEntry" value="__MAX__" step="0.00001"></div>
+          <div class="b"><label>Stop Loss</label><input type="number" id="gSL" value="__MIN__" step="0.00001"></div>
+          <div class="b"><label>Take Profit</label><input type="number" id="gTP" value="__TP__" step="0.00001"></div>
+        </div>
+        <div class="g-price">
+          <label>Precio actual (arrastra para simular el avance)</label>
+          <input type="range" id="gPrice" min="0" max="100" value="0" step="0.1">
+          <div class="pv" id="gPriceVal">—</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Hitos de gestión (R = riesgo inicial)</h2>
+        <div class="g-steps">
+          <div class="g-step" id="st-open"><div class="num">1</div><div class="body"><div class="t">Orden activada</div><div class="d">Se llena la direccional; se cancela la opuesta.</div></div></div>
+          <div class="g-step" id="st-be"><div class="num">2</div><div class="body"><div class="t">Break-even +1R</div><div class="d">En +1.0R el SL sube a entry (sin pérdida).</div></div></div>
+          <div class="g-step" id="st-partial"><div class="num">3</div><div class="body"><div class="t">Salida parcial +2R</div><div class="d">Cierra 50% de la posición; SL a entry duro.</div></div></div>
+          <div class="g-step" id="st-trail"><div class="num">4</div><div class="body"><div class="t">Trailing 50% restante</div><div class="d">SL sigue al precio cada 10 pips desde +2R hasta cierre.</div></div></div>
+        </div>
+        <div class="g-status open" id="gStatus">Operación abierta — en camino a +1R</div>
+        <div class="note" id="gNote" style="margin-top:10px;"></div>
+      </div>
+    </section>
+
+    <!-- ============ M6 NOTIFICADOR ============ -->
+    <section id="view-m6" class="hidden">
+      <div class="topbar"><div class="t">Módulo 6 · Notificador<small>TELEGRAM · PREVIEW</small></div><span class="info-date" data-date="__FECHA__"><span class="lbl">Info:</span><span class="val">--/--/----</span><span class="tag"></span></span></div>
+      <div class="card">
+        <h2>Eventos a notificar</h2>
+        <div class="meta">
+          <label class="chk"><input type="checkbox" id="n-box" checked> Box asiático matutino (al generar dashboard)</label>
+          <label class="chk"><input type="checkbox" id="n-break" checked> Breakout detectado (orden activada)</label>
+          <label class="chk"><input type="checkbox" id="n-be" checked> Break-even alcanzado (+1R)</label>
+          <label class="chk"><input type="checkbox" id="n-partial" checked> Salida parcial (+2R)</label>
+          <label class="chk"><input type="checkbox" id="n-close" checked> Cierre de operación</label>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Preview del mensaje (box de hoy)</h2>
+        <div class="msg-preview" id="nPreview">📊 <b>London BOS</b> · __FECHA__
+🟢 <b>OPERABLE</b> · Box EUR/USD
+Techo 1.14523 · Piso 1.14346
+Rango <b>17.7 pips</b> ✅
+Filtro 15–40: DENTRO DE RANGO</div>
+        <button class="btn-primary" id="nSend" style="margin-top:14px;">Enviar preview ahora (requiere token)</button>
+        <div class="note" id="nStatus" style="margin-top:8px;"></div>
+      </div>
+    </section>
+
+    <!-- ============ M7 LOGGER ============ -->
+    <section id="view-m7" class="hidden">
+      <div class="topbar"><div class="t">Módulo 7 · Logger<small>HISTORIAL DE SESIONES</small></div><span class="info-date" data-date="__LOG_FECHA__"><span class="lbl">Info:</span><span class="val">--/--/----</span><span class="tag"></span></span></div>
+      <div class="card">
+        <h2>Sesiones asiáticas registradas</h2>
+        <div class="tbl" id="logTable">__LOG_ROWS__</div>
+        <div class="note" style="margin-top:10px;">Al generar el dashboard, la sesión de hoy se guarda automáticamente en <code>DATA/londonbos_log.db</code>.</div>
+      </div>
+      <div class="card">
+        <h2>📝 Paper Trades (simulación local con datos reales)</h2>
+        <div class="tbl" id="paperTable">__PAPER_ROWS__</div>
+        <div class="note" style="margin-top:10px;">Motor paper (Opción B): simula el ciclo M5 (BE+1R / parcial+2R / trailing) sobre barras 1m reales de 02:00–11:00 Lima. No ejecuta en IB.</div>
+      </div>
+    </section>
+
+    <!-- ============ M5/6/7 PRÓXIMAMENTE ============ -->
+    <section id="view-soon" class="hidden">
+      <div class="soon"><div class="big">🚧</div><div class="t">Módulo en desarrollo</div>
+      <p class="note" style="margin-top:10px;">Este módulo aún no está implementado.</p></div>
+    </section>
+  </div>
+
+<script>
+  // ---- FECHAS: indicador global + info por módulo (se ejecuta primero y aislado) ----
+  (function(){
+    try {
+      const pad=n=>String(n).padStart(2,'0');
+      function limaNow(){ const n=new Date(); return new Date(n.getTime()-5*3600000); }
+      function fmt(d){ return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth()+1)}/${d.getUTCFullYear()}`; }
+      const nd=document.getElementById('navDateText');
+      if(nd && (!nd.textContent || nd.textContent==='__HOY__')){ nd.textContent=fmt(limaNow()); }
+      document.querySelectorAll('.info-date').forEach(el=>{
+        const raw=el.getAttribute('data-date');
+        if(!raw || raw.startsWith('__')){ return; } // placeholder sin inyectar: omitir
+        let dateObj;
+        if(raw==='today'){ dateObj=limaNow(); }
+        else { const p=raw.split('-').map(Number); dateObj=new Date(Date.UTC(p[0],p[1]-1,p[2])); }
+        const v=el.querySelector('.val'), t=el.querySelector('.tag');
+        if(v) v.textContent=fmt(dateObj);
+        if(t){
+          const diff=Math.floor((limaNow()-dateObj)/86400000);
+          if(diff<=0){ t.textContent='ACTUAL'; t.className='tag ok'; }
+          else { t.textContent='DESFASADO'; t.className='tag old'; }
+        }
+      });
+    } catch(e) { console.error('FECHAS block error:', e); }
+  })();
+
+  // ---- NAVEGACIÓN (sin file://, todo en una página) ----
+  const views = {dash:'view-dash', m1:'view-m1', m2:'view-m2', m3:'view-m3', m4:'view-m4', m5:'view-m5', m6:'view-m6', m7:'view-m7'};
+  document.querySelectorAll('.navbtn[data-view]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const v=b.dataset.view;
+      document.querySelectorAll('.navbtn[data-view]').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      Object.values(views).forEach(id=>document.getElementById(id).classList.add('hidden'));
+      document.getElementById('view-soon').classList.add('hidden');
+      if(views[v]) document.getElementById(views[v]).classList.remove('hidden');
+    });
+  });
+  // botones deshabilitados -> mostrar "próximamente"
+  document.querySelectorAll('.navbtn.disabled').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.navbtn[data-view]').forEach(x=>x.classList.remove('active'));
+      Object.values(views).forEach(id=>document.getElementById(id).classList.add('hidden'));
+      document.getElementById('view-soon').classList.remove('hidden');
+    });
+  });
+
+  // ---- M1 RELOJ EN VIVO (dos cuentas regresiva en paralelo) ----
+  function fmt(ms){
+    if(ms<0) ms=0;
+    const s=Math.floor(ms/1000);
+    const ch=Math.floor(s/3600), cm=Math.floor((s%3600)/60), cs=s%60;
+    const p=n=>String(n).padStart(2,'0');
+    return `${p(ch)}:${p(cm)}:${p(cs)}`;
+  }
+  function tick(){
+    const now=new Date();
+    const lima=new Date(now.getTime()-5*3600000);
+    const ldn=new Date(now.getTime()+1*3600000);
+    const tky=new Date(now.getTime()+9*3600000);
+    const p=n=>String(n).padStart(2,'0');
+    const hh=now.getUTCHours(), mm=now.getUTCMinutes(), ss=now.getUTCSeconds();
+    document.getElementById('tLIMA').textContent=`${p(lima.getUTCHours())}:${p(lima.getUTCMinutes())}:${p(lima.getUTCSeconds())}`;
+    document.getElementById('tLDN').textContent=`${p(ldn.getUTCHours())}:${p(ldn.getUTCMinutes())}:${p(ldn.getUTCSeconds())}`;
+    document.getElementById('tTKY').textContent=`${p(tky.getUTCHours())}:${p(tky.getUTCMinutes())}:${p(tky.getUTCSeconds())}`;
+    document.getElementById('dLIMA').className='dot on';
+    // cuenta regresiva ASIA: próximo 19:00 Lima = 00:00 UTC
+    const ASIA_OPEN=0*3600; // 00:00 UTC
+    const secNow=hh*3600+mm*60+ss;
+    let remAsia = secNow<ASIA_OPEN ? ASIA_OPEN-secNow : 86400-secNow;
+    // cuenta regresiva LONDRES: próximo 02:00 Lima = 07:00 UTC
+    const LDN_OPEN=7*3600; // 07:00 UTC
+    let remLdn = secNow<LDN_OPEN ? LDN_OPEN-secNow : 86400-secNow+LDN_OPEN;
+    document.getElementById('cdAsia').textContent=fmt(remAsia*1000);
+    document.getElementById('cdLdn').textContent=fmt(remLdn*1000);
+  }
+  tick(); setInterval(tick,1000);
+
+  // ---- M3 FILTRO INTERACTIVO ----
+  function fEval(pips){
+    const okMin=pips>=15, okMax=pips<=40, ok=okMin&&okMax;
+    const pct=Math.min(pips/60*100,100);
+    document.getElementById('fMark').style.left=pct+'%';
+    const v=document.getElementById('fVerdict');
+    const icon=document.getElementById('fVerdict').querySelector('.icon');
+    const est=document.getElementById('fVerdict').querySelector('.est');
+    const sub=document.getElementById('fVerdict').querySelector('.sub');
+    if(!okMin){v.className='verdict red';icon.textContent='✕';est.textContent='DESCARTAR';sub.textContent='Rango muy estrecho (<15 pips)';}
+    else if(!okMax){v.className='verdict red';icon.textContent='✕';est.textContent='DESCARTAR';sub.textContent='Rango muy amplio (>40 pips)';}
+    else{v.className='verdict';icon.textContent='✓';est.textContent='OPERAR';sub.textContent='Rango en zona válida (15–40 pips)';}
+    document.getElementById('fLogMin').innerHTML=okMin?`✓ SÍ (${pips}≥15)`:`✕ NO (${pips}<15)`;
+    document.getElementById('fLogMin').className=okMin?'pass':'fail';
+    document.getElementById('fLogMax').innerHTML=okMax?`✓ SÍ (${pips}≤40)`:`✕ NO (${pips}>40)`;
+    document.getElementById('fLogMax').className=okMax?'pass':'fail';
+    document.getElementById('fLogFin').innerHTML=ok?'🟢 OPERAR':'🔴 DESCARTAR';
+    document.getElementById('fLogFin').className=ok?'pass':'fail';
+  }
+  document.getElementById('fPips').addEventListener('input',e=>fEval(parseFloat(e.target.value)||0));
+  fEval(parseFloat(document.getElementById('fPips').value)||0);
+
+  // ---- M4 ÓRDENES ----
+  let oMode='fixed';
+  document.querySelectorAll('.mode').forEach(m=>{
+    m.addEventListener('click',()=>{
+      oMode=m.dataset.mode;
+      document.querySelectorAll('.mode').forEach(x=>x.classList.remove('active'));
+      m.classList.add('active');
+      document.getElementById('oManual').style.display = oMode==='manual'?'grid':'none';
+      oCalc();
+    });
+  });
+  ['oHigh','oLow','oSL','oRR'].forEach(id=>document.getElementById(id).addEventListener('input',oCalc));
+  function oCalc(){
+    const high=parseFloat(document.getElementById('oHigh').value);
+    const low=parseFloat(document.getElementById('oLow').value);
+    if(isNaN(high)||isNaN(low)||high<=low) return;
+    const range=high-low, pips=(range*10000).toFixed(1);
+    const ok=pips>=15&&pips<=40;
+    document.getElementById('oPips').textContent=`Rango: ${pips} pips ${ok?'✅':'❌ fuera de zona'}`;
+    const M=0.00002;
+    const bE=high+M, sE=low-M;
+    let bSL,bTP,sSL,sTP,rr;
+    if(oMode==='fixed'){bSL=low-M;bTP=bE+range;sSL=high+M;sTP=sE-range;rr=`1:${(range/(range+M*2)).toFixed(2)}`;}
+    else if(oMode==='manual'){const sl=parseFloat(document.getElementById('oSL').value)||25,r=parseFloat(document.getElementById('oRR').value)||1.5,sv=sl*0.0001,tv=sl*r*0.0001;bSL=bE-sv;bTP=bE+tv;sSL=sE+sv;sTP=sE-tv;rr=`1:${r.toFixed(1)}`;}
+    else{bSL=low-M;bTP=null;sSL=high+M;sTP=null;rr='Trailing';}
+    const f5=n=>n.toFixed(5);
+    document.getElementById('bE').textContent=f5(bE);
+    document.getElementById('bS').textContent=f5(bSL);
+    document.getElementById('bT').textContent=bTP?f5(bTP):'Abierto 🎯';
+    document.getElementById('bR').textContent=rr;
+    document.getElementById('sE').textContent=f5(sE);
+    document.getElementById('sS').textContent=f5(sSL);
+    document.getElementById('sT').textContent=sTP?f5(sTP):'Abierto 🎯';
+    document.getElementById('sR').textContent=rr;
+  }
+  oCalc();
+
+  // ---- M5 GESTOR DE SALIDA (simulador) ----
+  let gDir='buy';
+  document.querySelectorAll('#view-m5 .mode').forEach(m=>{
+    m.addEventListener('click',()=>{
+      gDir=m.dataset.dir;
+      document.querySelectorAll('#view-m5 .mode').forEach(x=>x.classList.remove('active'));
+      m.classList.add('active');
+      gSim();
+    });
+  });
+  ['gEntry','gSL','gTP'].forEach(id=>document.getElementById(id).addEventListener('input',gSim));
+  document.getElementById('gPrice').addEventListener('input',gSim);
+  function gSim(){
+    const entry=parseFloat(document.getElementById('gEntry').value);
+    const sl=parseFloat(document.getElementById('gSL').value);
+    const tp=parseFloat(document.getElementById('gTP').value);
+    if(isNaN(entry)||isNaN(sl)||isNaN(tp)) return;
+    const risk=Math.abs(entry-sl);
+    const R=risk; // en precio
+    if(R<=0) return;
+    // precio actual mapeado: 0% = entry-2R, 100% = tp+2R para ver el recorrido
+    const start=entry-2*R, end=tp+2*R;
+    const slider=parseFloat(document.getElementById('gPrice').value); // 0..100
+    const price=start+(end-start)*slider/100;
+    document.getElementById('gPriceVal').textContent=price.toFixed(5);
+    // R ganado (dirección)
+    const adv = gDir==='buy' ? (price-entry) : (entry-price);
+    const rGained = adv/R; // puede ser negativo
+    // hitos
+    const rBE=1.0, rPartial=2.0;
+    const stOpen=document.getElementById('st-open');
+    const stBE=document.getElementById('st-be');
+    const stPart=document.getElementById('st-partial');
+    const stTrail=document.getElementById('st-trail');
+    [stOpen,stBE,stPart,stTrail].forEach(s=>s.className='g-step');
+    const status=document.getElementById('gStatus');
+    const note=document.getElementById('gNote');
+    // paso 1: abierta (siempre, es la simulación post-activación)
+    stOpen.className='g-step done';
+    if(rGained>=rBE){ stBE.className='g-step done'; }
+    if(rGained>=rPartial){
+      stPart.className='g-step done';
+      stTrail.className='g-step active';
+    }
+    let cls='open', msg='';
+    if(rGained<0){
+      cls='open'; msg=`En pérdida: ${rGained.toFixed(2)}R — SL en ${sl.toFixed(5)}`;
+    } else if(rGained<rBE){
+      cls='open'; msg=`Avance ${rGained.toFixed(2)}R — esperando +1R para break-even`;
+    } else if(rGained<rPartial){
+      cls='be'; msg=`✓ Break-even alcanzado (+${rGained.toFixed(2)}R). SL en entry ${entry.toFixed(5)}`;
+      stBE.className='g-step done';
+    } else {
+      cls='partial'; msg=`✓ Salida parcial en +${rGained.toFixed(2)}R: 50% cerrado, SL a entry. Trail activo (paso 10 pips).`;
+      stPart.className='g-step done'; stTrail.className='g-step active';
+    }
+    status.className='g-status '+cls;
+    const short = cls==='open' ? (rGained<0 ? `Pérdida ${rGained.toFixed(2)}R` : `Avance ${rGained.toFixed(2)}R`)
+                : cls==='be' ? `Break-even ✓ (+${rGained.toFixed(2)}R)`
+                : `Parcial + trail ✓ (+${rGained.toFixed(2)}R)`;
+    status.textContent= short;
+    note.textContent=msg;
+  }
+  gSim();
+
+// ---- M6 NOTIFICADOR ----
+document.getElementById('nSend').addEventListener('click',()=>{
+  const st=document.getElementById('nStatus');
+  st.textContent='Envío requiere token de bot y chat_id configurados en DATA/notifier.py. El preview está listo para disparar desde el cron matutino.';
+  st.style.color='#757575';
+});
+
+// ---- M7 LOGGER ----
+// las filas ya vienen inyectadas desde fx_session.py (__LOG_ROWS__).
+// no requiere JS adicional; la tabla se puebla al generar el dashboard.
+</script>
+</body></html>

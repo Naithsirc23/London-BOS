@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>London BOS · Módulo 3 — Filtro</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black: #0A0A0A; --gold: #C9A84C; --gold-dim: rgba(201,168,76,0.15);
+    --paper: #E8E4DC; --green: #4CAF7D; --red: #E05252;
+    --divider: rgba(201,168,76,0.18); --gray: rgba(232,228,220,0.25);
+  }
+  body { background: var(--black); color: var(--paper); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+  .status-bar { display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; border: 1px solid var(--divider); border-radius: 6px; }
+  .logo { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; }
+  .status-date { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: var(--gold); background: rgba(201,168,76,0.10); border: 1px solid rgba(201,168,76,0.3); padding: 3px 8px; border-radius: 3px; text-transform: uppercase; }
+  .pulse { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--green); animation: p 2s infinite; }
+  @keyframes p { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+  /* INPUT CARD */
+  .card { border: 1px solid var(--divider); border-radius: 6px; padding: 16px; }
+  .card-title { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .info-date { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.08em; color: var(--gray); text-transform: none; display: inline-flex; align-items: center; gap: 6px; }
+  .info-date .val { color: var(--paper); font-weight: 700; }
+  .info-date .tag { font-size: 7px; font-weight: 700; padding: 1px 5px; border-radius: 2px; letter-spacing: 0.1em; }
+  .info-date .tag.ok { background: rgba(76,175,125,0.15); color: var(--green); border: 1px solid rgba(76,175,125,0.4); }
+  .info-date .tag.old { background: rgba(224,82,82,0.12); color: var(--red); border: 1px solid rgba(224,82,82,0.4); }
+
+  .input-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .input-label { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.1em; flex-shrink: 0; }
+  .pip-input {
+    font-family: 'Space Mono', monospace; font-size: 28px; font-weight: 700;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--divider);
+    color: var(--paper); border-radius: 4px; padding: 6px 12px;
+    width: 110px; text-align: center; outline: none;
+    transition: border-color 0.3s;
+  }
+  .pip-input:focus { border-color: var(--gold); }
+  .pip-unit { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--gray); }
+
+  .slider-wrap { display: flex; flex-direction: column; gap: 4px; }
+  input[type=range] {
+    width: 100%; accent-color: var(--gold); height: 4px;
+    background: rgba(255,255,255,0.06); border-radius: 2px; cursor: pointer;
+  }
+  .slider-ticks { display: flex; justify-content: space-between; }
+  .tick { font-family: 'Space Mono', monospace; font-size: 7px; color: var(--gray); }
+  .tick.zone { color: rgba(76,175,125,0.6); }
+
+  /* VEREDICTO */
+  .verdict-card {
+    border-radius: 6px; padding: 20px 16px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    transition: all 0.4s ease;
+  }
+  .verdict-card.ok   { border: 1px solid rgba(76,175,125,0.4);  background: rgba(76,175,125,0.06); }
+  .verdict-card.low  { border: 1px solid rgba(224,82,82,0.4);   background: rgba(224,82,82,0.06); }
+  .verdict-card.high { border: 1px solid rgba(224,82,82,0.4);   background: rgba(224,82,82,0.06); }
+
+  .verdict-icon { font-size: 36px; line-height: 1; }
+  .verdict-main { font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+  .verdict-main.ok   { color: var(--green); }
+  .verdict-main.low  { color: var(--red); }
+  .verdict-main.high { color: var(--red); }
+  .verdict-reason { font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--gray); text-align: center; line-height: 1.5; }
+
+  /* RANGE VIZ */
+  .range-wrap { margin-top: 4px; }
+  .range-track-outer { position: relative; height: 32px; }
+  .range-track { position: absolute; top: 12px; left: 0; right: 0; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; }
+  .range-zone  { position: absolute; top: 12px; height: 6px; background: rgba(76,175,125,0.2); border: 1px solid rgba(76,175,125,0.3); border-radius: 3px; }
+  .range-cursor { position: absolute; top: 6px; width: 3px; height: 18px; border-radius: 2px; transition: left 0.3s ease; }
+  .range-cursor.ok   { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .range-cursor.low  { background: var(--red); }
+  .range-cursor.high { background: var(--red); }
+  .range-ticks { display: flex; justify-content: space-between; }
+
+  /* DECISION LOG */
+  .log-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(201,168,76,0.07); font-family: 'Space Mono', monospace; font-size: 9px; }
+  .log-row:last-child { border-bottom: none; }
+  .log-cond { color: var(--gray); }
+  .log-val  { font-weight: 700; }
+  .log-val.pass { color: var(--green); }
+  .log-val.fail { color: var(--red); }
+</style>
+</head>
+<body>
+
+<div class="status-bar">
+  <div class="logo">LB · Módulo 3 — Filtro</div>
+  <span class="status-date" id="statusDate">📅 --/--/----</span>
+  <span class="pulse"></span>
+</div>
+
+<!-- INPUT -->
+<div class="card">
+  <div class="card-title">⚙️ Ingresa el rango asiático
+    <span class="info-date" data-date="today"><span class="val">--/--/----</span><span class="tag"></span></span>
+  </div>
+  <div class="input-row">
+    <div class="input-label">Rango</div>
+    <input class="pip-input" type="number" id="pipInput" value="24.5" min="0" max="60" step="0.5">
+    <div class="pip-unit">pips</div>
+  </div>
+  <div class="slider-wrap">
+    <input type="range" id="pipSlider" min="0" max="60" step="0.5" value="24.5">
+    <div class="slider-ticks">
+      <span class="tick">0</span>
+      <span class="tick zone">15</span>
+      <span class="tick zone">40</span>
+      <span class="tick">60</span>
+    </div>
+  </div>
+</div>
+
+<!-- VEREDICTO -->
+<div class="verdict-card ok" id="verdictCard">
+  <div class="verdict-icon" id="verdictIcon">✅</div>
+  <div class="verdict-main ok" id="verdictMain">OPERAR</div>
+  <div class="verdict-reason" id="verdictReason">Rango en zona válida. Pasar al Módulo 4.</div>
+</div>
+
+<!-- VISUALIZACION RANGO -->
+<div class="card">
+  <div class="card-title">📊 Posición en el rango
+    <span class="info-date" data-date="today"><span class="val">--/--/----</span><span class="tag"></span></span>
+  </div>
+  <div class="range-wrap">
+    <div class="range-track-outer">
+      <div class="range-track"></div>
+      <div class="range-zone" id="rZone"></div>
+      <div class="range-cursor ok" id="rCursor"></div>
+    </div>
+    <div class="range-ticks">
+      <span class="tick">0 pips</span>
+      <span class="tick zone">15</span>
+      <span class="tick zone">40</span>
+      <span class="tick">60</span>
+    </div>
+  </div>
+</div>
+
+<!-- LOG DE DECISION -->
+<div class="card">
+  <div class="card-title">🧠 Lógica de decisión
+    <span class="info-date" data-date="today"><span class="val">--/--/----</span><span class="tag"></span></span>
+  </div>
+  <div class="log-row">
+    <div class="log-cond">¿Rango ≥ 15 pips?</div>
+    <div class="log-val" id="logMin">—</div>
+  </div>
+  <div class="log-row">
+    <div class="log-cond">¿Rango ≤ 40 pips?</div>
+    <div class="log-val" id="logMax">—</div>
+  </div>
+  <div class="log-row">
+    <div class="log-cond">Veredicto final</div>
+    <div class="log-val" id="logFinal">—</div>
+  </div>
+</div>
+
+<script>
+  const PIPS_MIN = 15, PIPS_MAX = 40, TRACK_MAX = 60;
+
+  const pipInput  = document.getElementById('pipInput');
+  const pipSlider = document.getElementById('pipSlider');
+
+  function evaluate(pips) {
+    const okMin = pips >= PIPS_MIN;
+    const okMax = pips <= PIPS_MAX;
+    const ok    = okMin && okMax;
+    let cls, icon, main, reason;
+
+    if (!okMin) {
+      cls = 'low'; icon = '❌'; main = 'DESCARTAR';
+      reason = `Rango de ${pips} pips demasiado estrecho.\nMercado asiático sin movimiento suficiente.`;
+    } else if (!okMax) {
+      cls = 'high'; icon = '❌'; main = 'DESCARTAR';
+      reason = `Rango de ${pips} pips demasiado amplio.\nEl mercado ya se movió — riesgo de falsa ruptura.`;
+    } else {
+      cls = 'ok'; icon = '✅'; main = 'OPERAR';
+      reason = `Rango de ${pips} pips en zona válida (15–40).\nCondiciones óptimas. Pasar al Módulo 4.`;
+    }
+    // Veredicto
+    const vc = document.getElementById('verdictCard');
+    vc.className = `verdict-card ${cls}`;
+    document.getElementById('verdictIcon').textContent = icon;
+    const vm = document.getElementById('verdictMain');
+    vm.textContent = main; vm.className = `verdict-main ${cls}`;
+    document.getElementById('verdictReason').textContent = reason;
+
+    // Cursor
+    const pct = Math.min(pips / TRACK_MAX, 1) * 100;
+    const cursor = document.getElementById('rCursor');
+    cursor.style.left = `calc(${pct}% - 1.5px)`;
+    cursor.className  = `range-cursor ${cls}`;
+
+    // Zona
+    const zL = (PIPS_MIN/TRACK_MAX)*100;
+    const zW = ((PIPS_MAX-PIPS_MIN)/TRACK_MAX)*100;
+    const rz = document.getElementById('rZone');
+    rz.style.left = zL+'%'; rz.style.width = zW+'%';
+
+    // Log
+    document.getElementById('logMin').textContent  = okMin ? `✅ SÍ (${pips} ≥ 15)` : `❌ NO (${pips} < 15)`;
+    document.getElementById('logMin').className    = `log-val ${okMin?'pass':'fail'}`;
+    document.getElementById('logMax').textContent  = okMax ? `✅ SÍ (${pips} ≤ 40)` : `❌ NO (${pips} > 40)`;
+    document.getElementById('logMax').className    = `log-val ${okMax?'pass':'fail'}`;
+    document.getElementById('logFinal').textContent = ok ? '🟢 OPERAR' : '🔴 DESCARTAR';
+    document.getElementById('logFinal').className   = `log-val ${ok?'pass':'fail'}`;
+  }
+
+  pipInput.addEventListener('input', () => {
+    pipSlider.value = pipInput.value;
+    evaluate(parseFloat(pipInput.value)||0);
+  });
+  pipSlider.addEventListener('input', () => {
+    pipInput.value = pipSlider.value;
+    evaluate(parseFloat(pipSlider.value)||0);
+  });
+
+  evaluate(24.5);
+
+  // ---- FECHAS: indicador global + info por sección ----
+  (function(){
+    const pad=n=>String(n).padStart(2,'0');
+    function limaNow(){ const n=new Date(); return new Date(n.getTime()-5*3600000); }
+    function fmt(d){ return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth()+1)}/${d.getUTCFullYear()}`; }
+    const sd=document.getElementById('statusDate');
+    if(sd) sd.textContent='📅 '+fmt(limaNow());
+    document.querySelectorAll('.info-date').forEach(el=>{
+      const raw=el.getAttribute('data-date');
+      let dateObj = raw==='today' ? limaNow() : (()=>{const [y,m,d]=raw.split('-').map(Number); return new Date(Date.UTC(y,m-1,d));})();
+      const v=el.querySelector('.val'), t=el.querySelector('.tag');
+      if(v) v.textContent=fmt(dateObj);
+      if(t){
+        const diff=Math.floor((limaNow()-dateObj)/86400000);
+        if(diff<=0){ t.textContent='ACTUAL'; t.className='tag ok'; }
+        else { t.textContent='DESFASADO'; t.className='tag old'; }
+      }
+    });
+  })();
+
+</script>
+</body>
+</html>

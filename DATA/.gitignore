@@ -1,0 +1,4 @@
+# Entorno virtual y caches de Python (no commitear)
+.venv/
+__pycache__/
+*.pyc
