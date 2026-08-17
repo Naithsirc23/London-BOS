@@ -16,11 +16,13 @@ from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fx_session as fx
+from londonbos_core.models import Direction, SessionBox, StrategyConfig
+from londonbos_core.rules import build_plan, management_thresholds
 
 LIMA = timezone(timedelta(hours=-5))
-MARGIN = 0.00002       # 2 pips buffer para entry
-TRAIL_STEP = 0.00100   # 10 pips trailing sobre el 50% restante
-CIERRE = 11            # hora Lima de cierre forzoso
+CONFIG = StrategyConfig(target_rr=1.5, partial_rr=None)
+TRAIL_STEP = CONFIG.trailing_step_pips / 10000
+CIERRE = CONFIG.close_hour_lima
 
 
 def barras_dia(fecha_lima, hasta_hora=11):
@@ -55,17 +57,26 @@ def barras_dia(fecha_lima, hasta_hora=11):
 
 
 def simular(box, barras):
-    """Simula el ciclo M5 sobre las barras reales. Devuelve dict de resultado."""
-    mx, mn = box["maximo"], box["minimo"]
-    buy_entry = mx + MARGIN
-    sell_entry = mn - MARGIN
-    risk = abs(buy_entry - mn)
-    tp_buy = buy_entry + 1.5 * risk
-    tp_sell = sell_entry - 1.5 * risk
+    """Simula el ciclo usando el contrato único del motor de dominio."""
+    session = SessionBox(
+        session_date=str(box["inicio"].date()),
+        start=box["inicio"],
+        end=box["fin"],
+        high=box["maximo"],
+        low=box["minimo"],
+        bars=box.get("nbarras", 0),
+        source=box.get("source", "unknown"),
+    )
+    buy_plan = build_plan(session, Direction.BUY, CONFIG) if box["en_zona"] else None
+    sell_plan = build_plan(session, Direction.SELL, CONFIG) if box["en_zona"] else None
+    buy_entry = buy_plan.entry if buy_plan else None
+    sell_entry = sell_plan.entry if sell_plan else None
 
     # estados
     direccion = None
     entry = sl = tp = None
+    risk = None
+    thresholds = None
     be_hecho = parcial_hecho = False
     sl_actual = None
     salida = None
@@ -75,14 +86,18 @@ def simular(box, barras):
     for t, precio in barras:
         if direccion is None:
             # detectar ruptura
-            if precio >= buy_entry:
+            if buy_plan and precio >= buy_plan.entry:
                 direccion = "BUY"
-                entry, sl, tp = buy_entry, mn, tp_buy
+                entry, sl, tp = buy_plan.entry, buy_plan.stop_loss, buy_plan.take_profit
+                risk = buy_plan.risk_price
+                thresholds = management_thresholds(buy_plan, CONFIG)
                 sl_actual = sl
                 hitos.append(("entry", t, precio))
-            elif precio <= sell_entry:
+            elif sell_plan and precio <= sell_plan.entry:
                 direccion = "SELL"
-                entry, sl, tp = sell_entry, mx, tp_sell
+                entry, sl, tp = sell_plan.entry, sell_plan.stop_loss, sell_plan.take_profit
+                risk = sell_plan.risk_price
+                thresholds = management_thresholds(sell_plan, CONFIG)
                 sl_actual = sl
                 hitos.append(("entry", t, precio))
             continue
@@ -90,17 +105,18 @@ def simular(box, barras):
         if direccion == "BUY":
             # TP
             if precio >= tp:
-                salida = "TP"; r_final = 1.5; hitos.append(("tp", t, precio)); break
+                salida = "TP"; r_final = CONFIG.target_rr; hitos.append(("tp", t, precio)); break
             # SL (antes de BE)
             if (not be_hecho) and precio <= sl_actual:
                 salida = "SL"; r_final = -1.0; hitos.append(("sl", t, precio)); break
             # BE +1R
-            if (not be_hecho) and precio >= entry + risk:
+            if (not be_hecho) and precio >= thresholds["break_even"]:
                 be_hecho = True
                 sl_actual = entry
                 hitos.append(("be", t, precio))
             # Parcial +2R
-            if be_hecho and (not parcial_hecho) and precio >= entry + 2 * risk:
+            if (thresholds["partial"] is not None and be_hecho and
+                    (not parcial_hecho) and precio >= thresholds["partial"]):
                 parcial_hecho = True
                 sl_actual = entry  # duro a entry en el resto
                 hitos.append(("partial", t, precio))
@@ -115,14 +131,15 @@ def simular(box, barras):
                     hitos.append(("trail_out", t, precio)); break
         else:  # SELL
             if precio <= tp:
-                salida = "TP"; r_final = 1.5; hitos.append(("tp", t, precio)); break
+                salida = "TP"; r_final = CONFIG.target_rr; hitos.append(("tp", t, precio)); break
             if (not be_hecho) and precio >= sl_actual:
                 salida = "SL"; r_final = -1.0; hitos.append(("sl", t, precio)); break
-            if (not be_hecho) and precio <= entry - risk:
+            if (not be_hecho) and precio <= thresholds["break_even"]:
                 be_hecho = True
                 sl_actual = entry
                 hitos.append(("be", t, precio))
-            if be_hecho and (not parcial_hecho) and precio <= entry - 2 * risk:
+            if (thresholds["partial"] is not None and be_hecho and
+                    (not parcial_hecho) and precio <= thresholds["partial"]):
                 parcial_hecho = True
                 sl_actual = entry
                 hitos.append(("partial", t, precio))

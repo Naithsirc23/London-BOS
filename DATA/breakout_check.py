@@ -17,6 +17,8 @@ from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from notifier import Notificador, mensaje_box
+from londonbos_core.models import Direction, SessionBox, StrategyConfig, TradeStatus
+from londonbos_core.rules import evaluate_breakout
 
 # ---- zonas horarias ----
 LIMA = timezone(timedelta(hours=-5))
@@ -41,49 +43,40 @@ def _ib_precio(port=4001, client=5):
 
 
 def _box_hoy(port=4001, client=5, fecha=None):
-    """Recalcula el box asiático de hoy (o fecha dada) usando fx_session."""
+    """Recalcula el box y conserva el contrato dict de fx_session."""
     try:
         import fx_session as fx
-        inicio, fin, maximo, minimo, rango, en_zona, nb = fx.calcular_box(
-            port=port, client=client, fecha_ref=fecha)
-        return dict(maximo=maximo, minimo=minimo, rango=rango,
-                    en_zona=en_zona, inicio=inicio, fin=fin)
+        box = fx.calcular_box(port=port, client=client, fecha_ref=fecha)
+        return box if box else None
     except Exception as e:
         print(f"[BREAKOUT] No se pudo calcular box: {e}")
         return None
 
 
 def evaluar(precio, box):
-    """Determina estado del trade a los 20min usando niveles 1.5R."""
-    mx, mn = box["maximo"], box["minimo"]
-    buy_entry = mx + MARGIN
-    sell_entry = mn - MARGIN
-    risk = abs(buy_entry - mn)  # = maximo+margin - minimo
-    tp_buy = buy_entry + 1.5 * risk
-    tp_sell = sell_entry - 1.5 * risk
-    # ruptura alcista
-    if precio >= buy_entry:
-        if precio >= tp_buy:
-            return (f"✅ TP ALCANZADO (+1.5R)\nCompra ejecutada a {buy_entry:.5f}, "
-                    f"objetivo {tp_buy:.5f} tocado.")
-        if precio <= mn:  # cayó y tocó el piso -> SL del buy
-            return f"❌ SL GOLPEADO (-1.0R)\nEl precio cayó bajo el piso {mn:.5f}."
-        r = (precio - buy_entry) / risk
-        return (f"🔵 ABIERTA · BUY (largo)\nEntró a {buy_entry:.5f}, ahora {precio:.5f} "
-                f"({r:+.2f}R). En camino a +1R (break-even) / +1.5R (TP).")
-    # ruptura bajista
-    if precio <= sell_entry:
-        if precio <= tp_sell:
-            return (f"✅ TP ALCANZADO (+1.5R)\nVenta ejecutada a {sell_entry:.5f}, "
-                    f"objetivo {tp_sell:.5f} tocado.")
-        if precio >= mx:  # subió y tocó el techo -> SL del sell
-            return f"❌ SL GOLPEADO (-1.0R)\nEl precio subió sobre el techo {mx:.5f}."
-        r = (sell_entry - precio) / risk
-        return (f"🔵 ABIERTA · SELL (corto)\nEntró a {sell_entry:.5f}, ahora {precio:.5f} "
-                f"({r:+.2f}R). En camino a +1R (break-even) / +1.5R (TP).")
-    # sin ruptura
-    return (f"⚪ SIN BREAKOUT\nEl precio {precio:.5f} sigue dentro del box "
-            f"[{mn:.5f} – {mx:.5f}]. No se activó ninguna orden.")
+    """Determina el estado usando el motor de dominio compartido."""
+    session = SessionBox(
+        session_date=str(box["inicio"].date()),
+        start=box["inicio"],
+        end=box["fin"],
+        high=box["maximo"],
+        low=box["minimo"],
+        bars=box.get("nbarras", 0),
+        source=box.get("source", "unknown"),
+    )
+    snapshot = evaluate_breakout(precio, session, StrategyConfig())
+    if snapshot.status is TradeStatus.NO_OPERABLE:
+        return f"🔴 NO OPERABLE\nRango {session.range_pips:.1f} pips fuera de 15–40."
+    if snapshot.status is TradeStatus.NO_BREAKOUT:
+        return (f"⚪ SIN BREAKOUT\nEl precio {precio:.5f} sigue dentro del box "
+                f"[{session.low:.5f} – {session.high:.5f}]. No se activó ninguna orden.")
+    direction = snapshot.direction.value if snapshot.direction else "—"
+    r = snapshot.r_multiple if snapshot.r_multiple is not None else 0.0
+    if snapshot.status is TradeStatus.CLOSED and r > 0:
+        return f"✅ TP ALCANZADO (+1.5R)\n{direction} cerrada en objetivo."
+    if snapshot.status is TradeStatus.CLOSED and r < 0:
+        return f"❌ SL GOLPEADO (-1.0R)\n{direction} cerrada en stop."
+    return f"🔵 ABIERTA · {direction}\nPrecio {precio:.5f} ({r:+.2f}R)."
 
 
 def main():

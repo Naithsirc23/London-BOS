@@ -2,3 +2,17 @@
 .venv/
 __pycache__/
 *.pyc
+
+# Secretos y configuración local
+.env
+.env.*
+!.env.example
+
+# Datos generados localmente
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs operativos
+../cron/logs/
+*.log
