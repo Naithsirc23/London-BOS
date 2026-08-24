@@ -1,0 +1,14 @@
+{
+  "name": "London-BOS Operations Console",
+  "short_name": "London-BOS",
+  "description": "Consola read-only para monitorizar sesiones, paper trading y eventos de London-BOS.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F1E8",
+  "theme_color": "#12343B",
+  "lang": "es",
+  "icons": [
+    { "src": "/manus-storage/london-bos-monogram_5aba3ee8.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/manus-storage/london-bos-monogram_5aba3ee8.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
