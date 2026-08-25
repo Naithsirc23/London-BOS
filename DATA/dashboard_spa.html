@@ -303,9 +303,8 @@
       <div class="card">
         <h2>Modo TP / SL</h2>
         <div class="modes">
-          <div class="mode active" data-mode="fixed">Fijo<span class="d">TP=1×rango, SL=extremo</span></div>
+          <div class="mode active" data-mode="fixed">Fijo<span class="d">TP=1.5R, SL=extremo opuesto</span></div>
           <div class="mode" data-mode="manual">Manual<span class="d">Tú defines SL y R:R</span></div>
-          <div class="mode" data-mode="trailing">Trailing<span class="d">SL sigue al precio</span></div>
         </div>
         <div class="o-in" id="oManual" style="display:none;">
           <div class="b"><label>SL (pips)</label><input type="number" id="oSL" value="25" step="1"></div>
@@ -333,7 +332,7 @@
 
     <!-- ============ M5 GESTOR DE SALIDA ============ -->
     <section id="view-m5" class="hidden">
-      <div class="topbar"><div class="t">Módulo 5 · Gestor de salida<small>SIMULADOR · BREAKEVEN + PARCIAL + TRAILING</small></div><span class="info-date" data-date="today"><span class="lbl">Info:</span><span class="val">--/--/----</span><span class="tag"></span></span></div>
+      <div class="topbar"><div class="t">Módulo 5 · Gestor de salida<small>SIMULADOR · BREAKEVEN +1R / TP FIJO +1.5R / CORTE 11:00</small></div><span class="info-date" data-date="today"><span class="lbl">Info:</span><span class="val">--/--/----</span><span class="tag"></span></span></div>
       <div class="card">
         <h2>Parámetros de la operación</h2>
         <div class="g-dir">
@@ -356,8 +355,8 @@
         <div class="g-steps">
           <div class="g-step" id="st-open"><div class="num">1</div><div class="body"><div class="t">Orden activada</div><div class="d">Se llena la direccional; se cancela la opuesta.</div></div></div>
           <div class="g-step" id="st-be"><div class="num">2</div><div class="body"><div class="t">Break-even +1R</div><div class="d">En +1.0R el SL sube a entry (sin pérdida).</div></div></div>
-          <div class="g-step" id="st-partial"><div class="num">3</div><div class="body"><div class="t">Salida parcial +2R</div><div class="d">Cierra 50% de la posición; SL a entry duro.</div></div></div>
-          <div class="g-step" id="st-trail"><div class="num">4</div><div class="body"><div class="t">Trailing 50% restante</div><div class="d">SL sigue al precio cada 10 pips desde +2R hasta cierre.</div></div></div>
+          <div class="g-step" id="st-tp"><div class="num">3</div><div class="body"><div class="t">TP fijo +1.5R</div><div class="d">Cierre total al alcanzar 1.5× riesgo.</div></div></div>
+          <div class="g-step" id="st-cut"><div class="num">4</div><div class="body"><div class="t">Corte 11:00 Lima</div><div class="d">Cierre forzoso al fin del solapamiento LDN/NY.</div></div></div>
         </div>
         <div class="g-status open" id="gStatus">Operación abierta — en camino a +1R</div>
         <div class="note" id="gNote" style="margin-top:10px;"></div>
@@ -373,7 +372,7 @@
           <label class="chk"><input type="checkbox" id="n-box" checked> Box asiático matutino (al generar dashboard)</label>
           <label class="chk"><input type="checkbox" id="n-break" checked> Breakout detectado (orden activada)</label>
           <label class="chk"><input type="checkbox" id="n-be" checked> Break-even alcanzado (+1R)</label>
-          <label class="chk"><input type="checkbox" id="n-partial" checked> Salida parcial (+2R)</label>
+          <label class="chk"><input type="checkbox" id="n-tp" checked> Take Profit +1.5R</label>
           <label class="chk"><input type="checkbox" id="n-close" checked> Cierre de operación</label>
         </div>
       </div>
@@ -400,7 +399,7 @@ Filtro 15–40: DENTRO DE RANGO</div>
       <div class="card">
         <h2>📝 Paper Trades (simulación local con datos reales)</h2>
         <div class="tbl" id="paperTable">__PAPER_ROWS__</div>
-        <div class="note" style="margin-top:10px;">Motor paper (Opción B): simula el ciclo M5 (BE+1R / parcial+2R / trailing) sobre barras 1m reales de 02:00–11:00 Lima. No ejecuta en IB.</div>
+        <div class="note" style="margin-top:10px;">Motor paper (Opción B): simula el ciclo M5 (BE+1R / TP fijo +1.5R / corte 11:00) sobre barras 1m reales de 02:00–11:00 Lima. No ejecuta en IB.</div>
       </div>
     </section>
 
@@ -530,10 +529,10 @@ Filtro 15–40: DENTRO DE RANGO</div>
     const range=high-low, pips=(range*10000).toFixed(1);
     const ok=pips>=15&&pips<=40;
     document.getElementById('oPips').textContent=`Rango: ${pips} pips ${ok?'✅':'❌ fuera de zona'}`;
-    const M=0.00002;
+    const M=0.00020;
     const bE=high+M, sE=low-M;
     let bSL,bTP,sSL,sTP,rr;
-    if(oMode==='fixed'){bSL=low-M;bTP=bE+range;sSL=high+M;sTP=sE-range;rr=`1:${(range/(range+M*2)).toFixed(2)}`;}
+    if(oMode==='fixed'){bSL=low-M;bTP=bE+range*1.5;sSL=high+M;sTP=sE-range*1.5;rr=`1.5:1`;}
     else if(oMode==='manual'){const sl=parseFloat(document.getElementById('oSL').value)||25,r=parseFloat(document.getElementById('oRR').value)||1.5,sv=sl*0.0001,tv=sl*r*0.0001;bSL=bE-sv;bTP=bE+tv;sSL=sE+sv;sTP=sE-tv;rr=`1:${r.toFixed(1)}`;}
     else{bSL=low-M;bTP=null;sSL=high+M;sTP=null;rr='Trailing';}
     const f5=n=>n.toFixed(5);
@@ -568,48 +567,51 @@ Filtro 15–40: DENTRO DE RANGO</div>
     const risk=Math.abs(entry-sl);
     const R=risk; // en precio
     if(R<=0) return;
-    // precio actual mapeado: 0% = entry-2R, 100% = tp+2R para ver el recorrido
-    const start=entry-2*R, end=tp+2*R;
+    // precio actual mapeado: rango desde entry-1R hasta TP+0.5R para simular avance
+    const start=entry-R, end=tp+0.5*R;
     const slider=parseFloat(document.getElementById('gPrice').value); // 0..100
     const price=start+(end-start)*slider/100;
     document.getElementById('gPriceVal').textContent=price.toFixed(5);
     // R ganado (dirección)
     const adv = gDir==='buy' ? (price-entry) : (entry-price);
     const rGained = adv/R; // puede ser negativo
-    // hitos
-    const rBE=1.0, rPartial=2.0;
-    const stOpen=document.getElementById('st-open');
-    const stBE=document.getElementById('st-be');
-    const stPart=document.getElementById('st-partial');
-    const stTrail=document.getElementById('st-trail');
-    [stOpen,stBE,stPart,stTrail].forEach(s=>s.className='g-step');
-    const status=document.getElementById('gStatus');
-    const note=document.getElementById('gNote');
+    // hitos canónicos: BE +1R, TP fijo +1.5R, corte 11:00
+    const rBE = 1.0;
+    const rTP = 1.5;
+    const stOpen = document.getElementById('st-open');
+    const stBE = document.getElementById('st-be');
+    const stTP = document.getElementById('st-tp');
+    const stCut = document.getElementById('st-cut');
+    [stOpen, stBE, stTP, stCut].forEach(s => s.className = 'g-step');
+    const status = document.getElementById('gStatus');
+    const note = document.getElementById('gNote');
     // paso 1: abierta (siempre, es la simulación post-activación)
-    stOpen.className='g-step done';
-    if(rGained>=rBE){ stBE.className='g-step done'; }
-    if(rGained>=rPartial){
-      stPart.className='g-step done';
-      stTrail.className='g-step active';
-    }
-    let cls='open', msg='';
-    if(rGained<0){
-      cls='open'; msg=`En pérdida: ${rGained.toFixed(2)}R — SL en ${sl.toFixed(5)}`;
-    } else if(rGained<rBE){
-      cls='open'; msg=`Avance ${rGained.toFixed(2)}R — esperando +1R para break-even`;
-    } else if(rGained<rPartial){
-      cls='be'; msg=`✓ Break-even alcanzado (+${rGained.toFixed(2)}R). SL en entry ${entry.toFixed(5)}`;
-      stBE.className='g-step done';
+    stOpen.className = 'g-step done';
+    if (rGained >= rTP) {
+      stBE.className = 'g-step done';
+      stTP.className = 'g-step done';
+      status.className = 'g-status tp';
+      const short = `TP +1.5R ✓ (+${rGained.toFixed(2)}R)`;
+      status.textContent = short;
+      note.textContent = `✓ Take Profit +1.5R alcanzado: cierre total en ${price.toFixed(5)}`;
+    } else if (rGained >= rBE) {
+      stBE.className = 'g-step done';
+      stTP.className = 'g-step active';
+      status.className = 'g-status be';
+      const short = `Break-even ✓ (+${rGained.toFixed(2)}R)`;
+      status.textContent = short;
+      note.textContent = `✓ Break-even alcanzado (+${rGained.toFixed(2)}R). SL en entry ${entry.toFixed(5)}. Objetivo TP +1.5R: ${(gDir==='buy' ? entry+1.5*R : entry-1.5*R).toFixed(5)}`;
+    } else if (rGained >= 0) {
+      status.className = 'g-status open';
+      const short = `Avance ${rGained.toFixed(2)}R`;
+      status.textContent = short;
+      note.textContent = `En camino a +1R para break-even. SL en ${sl.toFixed(5)}`;
     } else {
-      cls='partial'; msg=`✓ Salida parcial en +${rGained.toFixed(2)}R: 50% cerrado, SL a entry. Trail activo (paso 10 pips).`;
-      stPart.className='g-step done'; stTrail.className='g-step active';
+      status.className = 'g-status open';
+      const short = `Pérdida ${rGained.toFixed(2)}R`;
+      status.textContent = short;
+      note.textContent = `En pérdida: ${rGained.toFixed(2)}R — SL en ${sl.toFixed(5)}`;
     }
-    status.className='g-status '+cls;
-    const short = cls==='open' ? (rGained<0 ? `Pérdida ${rGained.toFixed(2)}R` : `Avance ${rGained.toFixed(2)}R`)
-                : cls==='be' ? `Break-even ✓ (+${rGained.toFixed(2)}R)`
-                : `Parcial + trail ✓ (+${rGained.toFixed(2)}R)`;
-    status.textContent= short;
-    note.textContent=msg;
   }
   gSim();
 

@@ -136,7 +136,7 @@
       <input type="radio" name="mode" value="fixed" checked>
       <div class="mode-icon">📌</div>
       <div class="mode-name">Fijo</div>
-      <div class="mode-desc">TP = 1× rango SL = extremo opuesto</div>
+      <div class="mode-desc">TP = 1.5× rango SL = extremo opuesto</div>
     </label>
 
     <label class="mode-btn" id="btn-manual">
@@ -144,13 +144,6 @@
       <div class="mode-icon">🎛️</div>
       <div class="mode-name">Manual</div>
       <div class="mode-desc">Defines SL y R:R tú mismo</div>
-    </label>
-
-    <label class="mode-btn" id="btn-trailing">
-      <input type="radio" name="mode" value="trailing">
-      <div class="mode-icon">🎯</div>
-      <div class="mode-name">Trailing</div>
-      <div class="mode-desc">SL sigue al precio paso a paso</div>
     </label>
 
   </div>
@@ -170,21 +163,6 @@
       </div>
     </div>
     <div class="param-note">TP = SL × R:R → arriesgas <span id="manNote1">—</span> pips para ganar <span id="manNote2">—</span> pips</div>
-  </div>
-
-  <!-- PARAMS TRAILING -->
-  <div class="mode-params" id="params-trailing">
-    <div class="param-grid">
-      <div class="param-row">
-        <div class="param-lbl">Step trailing (pips)</div>
-        <input class="num-input" id="trailStep" type="number" value="10" step="1" min="1">
-      </div>
-      <div class="param-row">
-        <div class="param-lbl">Activar desde (pips)</div>
-        <input class="num-input" id="trailActivate" type="number" value="15" step="1" min="1">
-      </div>
-    </div>
-    <div class="param-note">El SL se mueve cada <span id="trailNote1">—</span> pips que avance el precio, activándose al llegar a +<span id="trailNote2">—</span> pips de ganancia. Gestionado en Módulo 5.</div>
   </div>
 </div>
 
@@ -217,7 +195,7 @@
 </div>
 
 <script>
-  const MARGIN = 0.00002;
+  const MARGIN = 0.00020;
   const f5 = n => n.toFixed(5);
   const toPips = n => (n * 10000).toFixed(1);
 
@@ -238,7 +216,7 @@
   });
 
   // Param inputs
-  ['inHigh','inLow','manualSL','manualRR','trailStep','trailActivate'].forEach(id => {
+  ['inHigh','inLow','manualSL','manualRR'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', compute);
   });
@@ -259,14 +237,13 @@
 
     if (currentMode === 'fixed') {
       bSL = low  - MARGIN;
-      bTP = bEntry + range;
+      bTP = bEntry + range * 1.5;
       sSL = high + MARGIN;
-      sTP = sEntry - range;
-      const rr = (range / (range + MARGIN*2)).toFixed(2);
-      rrLabel = `R:R 1:${rr}`;
+      sTP = sEntry - range * 1.5;
+      rrLabel = `R:R 1.5:1`;
       badge = null;
 
-    } else if (currentMode === 'manual') {
+    } else { // manual
       const slPips = parseFloat(document.getElementById('manualSL').value) || 25;
       const rr     = parseFloat(document.getElementById('manualRR').value) || 1.5;
       const slVal  = slPips * 0.0001;
@@ -279,28 +256,16 @@
       badge = null;
       document.getElementById('manNote1').textContent = slPips;
       document.getElementById('manNote2').textContent = (slPips * rr).toFixed(1);
-
-    } else { // trailing
-      const step     = parseFloat(document.getElementById('trailStep').value) || 10;
-      const activate = parseFloat(document.getElementById('trailActivate').value) || 15;
-      bSL = low  - MARGIN;
-      bTP = bEntry + range;
-      sSL = high + MARGIN;
-      sTP = sEntry - range;
-      rrLabel = `Trailing desde +${activate} pips`;
-      badge = `SL se mueve cada ${step} pips`;
-      document.getElementById('trailNote1').textContent = step;
-      document.getElementById('trailNote2').textContent = activate;
     }
 
     // Fill cards
     document.getElementById('bEntry').textContent = f5(bEntry);
     document.getElementById('bSL').textContent    = f5(bSL);
-    document.getElementById('bTP').textContent    = currentMode==='trailing' ? 'Abierto 🎯' : f5(bTP);
+    document.getElementById('bTP').textContent    = f5(bTP);
     document.getElementById('bRR').textContent    = rrLabel;
     document.getElementById('sEntry').textContent = f5(sEntry);
     document.getElementById('sSL').textContent    = f5(sSL);
-    document.getElementById('sTP').textContent    = currentMode==='trailing' ? 'Abierto 🎯' : f5(sTP);
+    document.getElementById('sTP').textContent    = f5(sTP);
     document.getElementById('sRR').textContent    = rrLabel;
 
     const bb = document.getElementById('bBadge');
@@ -313,7 +278,7 @@
       sb.style.display = 'none';
     }
 
-    renderChart({ high, low, bEntry, bSL, bTP: currentMode==='trailing'?null:bTP, sEntry, sSL, sTP: currentMode==='trailing'?null:sTP });
+    renderChart({ high, low, bEntry, bSL, bTP, sEntry, sSL, sTP });
   }
 
   function renderChart({ high, low, bEntry, bSL, bTP, sEntry, sSL, sTP }) {

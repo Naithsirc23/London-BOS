@@ -25,10 +25,10 @@ Filtro clave: solo se opera si el rango asiático está entre 15 y 40 pips.
 | 2 | Escáner | ✅ Listo (IB) | Extrae máx/mín asiático vía IB Gateway, calcula rango en pips |
 | 3 | Filtro | ✅ Listo | Valida si el rango es operable (15–40 pips) |
 | 4 | Órdenes | ✅ Listo | Calculadora Buy/Sell Stop con SL (modos Fijo/Manual/Trailing) |
-| 5 | Gestor | ✅ Listo (simulador) | Break-even +1R, salida parcial +2R, trailing — simulador interactivo |
-| 6 | Notificador | ✅ Listo (preview + motor) | Preview de mensajes + `DATA/notifier.py` listo para Telegram |
+| 5 | Gestor | ✅ Listo (simulador) | Break-even +1R, TP fijo +1.5R, corte 11:00 Lima — simulador interactivo |
+| 6 | Notificador | ✅ Listo (preview + motor) | Preview de mensajes + `DATA/notifier.py` listo para Telegram (eventos: box, breakout, BE +1R, TP +1.5R, cierre/corte 11:00) |
 | 7 | Logger | ✅ Listo | SQLite `londonbos_log.db`; sesión de hoy se guarda al generar dashboard; tabla de sesiones (box + ruptura 20/60m) |
-| 8 | Paper Trade | ✅ Listo | Simulación M5 minuto a minuto sobre barras 1m reales; evalúa ventana 02:00–11:00 (o `--hasta`); notifica resumen por TG |
+| 8 | Paper Trade | ✅ Listo | Simulación M5 minuto a minuto sobre barras 1m reales; evalúa ventana 02:00–11:00 (o `--hasta`); gestión canónica BE+1R / TP 1.5R / corte 11:00; notifica resumen por TG |
 
 ## Stack técnico
 

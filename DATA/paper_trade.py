@@ -1,7 +1,7 @@
 """Módulo · Paper Trade (Opción B: simulación local con datos reales).
 
 Toma el box asiático de una fecha, calcula niveles 1.5R (Buy/Sell Stop + SL + TP),
-y simula el ciclo completo de gestión (M5: BE+1R, parcial+2R, trailing) usando
+y simula el ciclo de gestión canónico (M5: BE+1R, TP fijo +1.5R, corte 11:00) usando
 las barras reales de 1m de EUR/USD desde la apertura de Londres (02:00 Lima)
 hasta las 11:00 Lima. No ejecuta nada en IB; es paper 100% local.
 
@@ -18,8 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fx_session as fx
 
 LIMA = timezone(timedelta(hours=-5))
-MARGIN = 0.00002       # 2 pips buffer para entry
-TRAIL_STEP = 0.00100   # 10 pips trailing sobre el 50% restante
+MARGIN = 0.00020       # 2 pips buffer para entry (0.00020 = 2.0 pips)
 CIERRE = 11            # hora Lima de cierre forzoso
 
 
@@ -55,7 +54,9 @@ def barras_dia(fecha_lima, hasta_hora=11):
 
 
 def simular(box, barras):
-    """Simula el ciclo M5 sobre las barras reales. Devuelve dict de resultado."""
+    """Simula el ciclo M5 sobre las barras reales. Devuelve dict de resultado.
+    Gestión canónica: BE a +1R, TP fijo +1.5R, SL opuesto del box, corte 11:00 Lima.
+    Sin parcial +2R ni trailing."""
     mx, mn = box["maximo"], box["minimo"]
     buy_entry = mx + MARGIN
     sell_entry = mn - MARGIN
@@ -66,7 +67,7 @@ def simular(box, barras):
     # estados
     direccion = None
     entry = sl = tp = None
-    be_hecho = parcial_hecho = False
+    be_hecho = False
     sl_actual = None
     salida = None
     r_final = None
@@ -88,7 +89,7 @@ def simular(box, barras):
             continue
 
         if direccion == "BUY":
-            # TP
+            # TP (antes que BE para priorizar salida completa)
             if precio >= tp:
                 salida = "TP"; r_final = 1.5; hitos.append(("tp", t, precio)); break
             # SL (antes de BE)
@@ -99,41 +100,18 @@ def simular(box, barras):
                 be_hecho = True
                 sl_actual = entry
                 hitos.append(("be", t, precio))
-            # Parcial +2R
-            if be_hecho and (not parcial_hecho) and precio >= entry + 2 * risk:
-                parcial_hecho = True
-                sl_actual = entry  # duro a entry en el resto
-                hitos.append(("partial", t, precio))
-            # Trailing (solo si parcial hecho) cada 10 pips a favor
-            if parcial_hecho:
-                nuevo_sl = precio - TRAIL_STEP
-                if nuevo_sl > sl_actual:
-                    sl_actual = nuevo_sl
-                if precio <= sl_actual:
-                    salida = "TRAIL"
-                    r_final = (sl_actual - entry) / risk
-                    hitos.append(("trail_out", t, precio)); break
         else:  # SELL
+            # TP (antes que BE)
             if precio <= tp:
                 salida = "TP"; r_final = 1.5; hitos.append(("tp", t, precio)); break
+            # SL (antes de BE)
             if (not be_hecho) and precio >= sl_actual:
                 salida = "SL"; r_final = -1.0; hitos.append(("sl", t, precio)); break
+            # BE +1R
             if (not be_hecho) and precio <= entry - risk:
                 be_hecho = True
                 sl_actual = entry
                 hitos.append(("be", t, precio))
-            if be_hecho and (not parcial_hecho) and precio <= entry - 2 * risk:
-                parcial_hecho = True
-                sl_actual = entry
-                hitos.append(("partial", t, precio))
-            if parcial_hecho:
-                nuevo_sl = precio + TRAIL_STEP
-                if nuevo_sl < sl_actual:
-                    sl_actual = nuevo_sl
-                if precio >= sl_actual:
-                    salida = "TRAIL"
-                    r_final = (entry - sl_actual) / risk
-                    hitos.append(("trail_out", t, precio)); break
 
     # cierre forzoso 11:00
     if salida is None and direccion is not None:
@@ -163,6 +141,30 @@ def guardar_paper(fecha, res):
          res["salida"], res["r"]))
     con.commit()
     con.close()
+    # Log PAPER_TRADE_COMPLETED event with structured metadata
+    try:
+        import job_logger
+        job_logger.log_event(
+            "PAPER_TRADE_COMPLETED",
+            symbol="EURUSD",
+            price=res["entry"],
+            metadata=f"fecha={fecha},direccion={res['direccion']},salida={res['salida']},r={res['r']}",
+            metadata_json={
+                "schema_version": 1,
+                "fecha": fecha,
+                "direccion": res["direccion"],
+                "entry": res["entry"],
+                "sl": res["sl"],
+                "tp": res["tp"],
+                "salida": res["salida"],
+                "r": res["r"],
+                "hitos": [{"tipo": h[0], "hora": h[1].strftime("%H:%M"), "precio": h[2]} for h in res.get("hitos", [])],
+                "estrategia": "London-BOS",
+                "modo": "paper"
+            }
+        )
+    except Exception:
+        pass  # no bloquear si falla el event logging
 
 
 def main():
@@ -249,7 +251,7 @@ def _notificar(fecha, box, res, no_operable):
         dir_emoji = "🟢 BUY" if res["direccion"] == "BUY" else "🔴 SELL"
         salida_map = {
             "TP": "✅ TP 1.5R", "SL": "❌ SL -1.0R",
-            "TRAIL": "🟡 TRAIL", "ABIERTA_11H": "⏳ Abierta al corte",
+            "ABIERTA_11H": "⏳ Abierta al corte",
         }
         estado = salida_map.get(res["salida"], res["salida"])
         r_txt = f"{res['r']:+.2f}R" if res["r"] is not None else "—"

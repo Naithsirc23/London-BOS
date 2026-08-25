@@ -20,7 +20,7 @@ from notifier import Notificador, mensaje_box
 
 # ---- zonas horarias ----
 LIMA = timezone(timedelta(hours=-5))
-MARGIN = 0.00002  # buffer de 2 pips para entradas
+MARGIN = 0.00020  # buffer de 2 pips para entradas (0.00020 = 2.0 pips)
 
 
 def _ib_precio(port=4001, client=5):

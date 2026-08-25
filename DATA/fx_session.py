@@ -205,8 +205,8 @@ def _volcar_html(inicio, fin, maximo, minimo, rango_pips, en_zona, nbarras, path
     dentr = "✓ DENTRO DE RANGO" if en_zona else "✕ FUERA DE RANGO"
     pillcls = "" if en_zona else "red"
     vred = "" if en_zona else "red"
-    MARGIN = 0.00002
-    tp_fijo = maximo + MARGIN + (maximo - minimo)  # entry + rango (modo fijo M4)
+    MARGIN = 0.00020  # 2.0 pips buffer
+    tp_fijo = maximo + MARGIN + 1.5 * (maximo - minimo)  # entry + 1.5 * rango (modo canónico M4)
 
     if not central:
         # widget de solo-box (compacto, dinámico)
@@ -412,6 +412,28 @@ def _log_sesion(inicio, maximo, minimo, rango_pips, en_zona, nbarras):
         con.commit()
         con.close()
         print(f"[LOG] Sesión {fecha} registrada en logger.")
+        # Log SESSION_RECORDED event with structured metadata
+        try:
+            import job_logger
+            job_logger.log_event(
+                "SESSION_RECORDED",
+                symbol="EURUSD",
+                price=maximo,
+                metadata=f"fecha={fecha},rango_pips={rango_pips:.1f},operable={en_zona}",
+                metadata_json={
+                    "schema_version": 1,
+                    "fecha": fecha,
+                    "rango_pips": round(rango_pips, 1),
+                    "operable": 1 if en_zona else 0,
+                    "maximo": maximo,
+                    "minimo": minimo,
+                    "barras": nbarras,
+                    "fuente": "IB",
+                    "estrategia": "London-BOS"
+                }
+            )
+        except Exception:
+            pass  # no bloquear si falla el event logging
     except Exception as e:
         print(f"[LOG] No se pudo registrar (no bloquea): {e}")
 

@@ -34,25 +34,22 @@ Documento de estado y pendientes. Texto plano — no implementar todavía.
 ## Lógica acordada
 - Sesión asiática = rango de consolidación ANTES de la apertura de Londres.
   - Inicio: 19:00 Lima (apertura de Tokio, 09:00 JST).
-  - Fin: apertura de Londres = 08:00 local de Londres → **02:00 Lima en verano (BST) /
-    03:00 Lima en invierno (GMT)**. Lima no tiene DST; solo cambia el lado de Londres.
+  - Fin: apertura de Londres = 08:00 local de Londres → **02:00 Lima en verano (BST) / 03:00 Lima en invierno (GMT)**. Lima no tiene DST; solo cambia el lado de Londres.
 - Box: techo = max(High) asiático, piso = min(Low) asiático.
 - Filtro de operación: rango en [15, 40] pips → operar; fuera de rango → no operar.
-- Entradas (buffer 2 pips para evitar falsas activaciones):
+- Entradas (buffer 2 pips = 0.00020 para evitar falsas activaciones):
   - buy stop = techo + 2 pips
   - sell stop = piso − 2 pips
 - SL: lado opuesto del box (long → piso; short → techo).
-- RR: 2:1 propuesto por Claude; 1.5:1 acordado como más alcanzable (ver hallazgos).
-- Gestión de salida: NO estática. Debe incluir breakeven tras +1R, trailing y/o salida
-  parcial. (Pendiente de definir y programar.)
-- **Esquema de gestión de salida ACORDADO (2026-07-17), ver README/Módulo 5:**
+- RR canónico: 1.5:1 (TP = entrada + 1.5×riesgo).
+- Gestión de salida canónica (modo PAPER):
   1. Activación: se llena la orden direccional; se cancela la opuesta.
   2. Break-even +1R: en +1.0R el SL sube a entry (sin pérdida).
-  3. Salida parcial +2R: cierra 50% de la posición; SL a entry duro.
-  4. Trailing 50% restante: SL sigue al precio cada 10 pips desde +2R hasta cierre.
-  5. Cierre forzoso: 11:00 Lima (fin solapamiento LDN/NY) o hit de trailing.
-  - Implementado como **simulador interactivo** en el dashboard SPA (vista M5).
-    Falta: motor real conectado a IB (requiere gateway fuera de read-only).
+  3. TP fijo +1.5R: cierre total al alcanzar 1.5× riesgo.
+  4. Corte 11:00 Lima: cierre forzoso al fin del solapamiento LDN/NY.
+  5. Eliminados: salida parcial +2R y trailing (incompatibles con cerrar todo a +1.5R).
+- Implementado como **simulador interactivo** en el dashboard SPA (vista M5).
+  Falta: motor real conectado a IB (requiere gateway fuera de read-only).
 
 ## Hallazgos / validación real
 - Bug corregido: yfinance 1.5.1 devuelve columnas MultiIndex → se aplanan con
@@ -96,14 +93,9 @@ Documento de estado y pendientes. Texto plano — no implementar todavía.
   decida, idealmente ya con la gestión de salida (ítem 1) programada.
 - **Módulos 4–7 COMPLETOS (2026-07-17):**
   - M4 Órdenes: calculadora Buy/Sell Stop (Fijo/Manual/Trailing), datos IB.
-  - M5 Gestor: simulador interactivo BE+1R / parcial+2R / trailing (motor real IB
-    pendiente: requiere gateway fuera de read-only).
-  - M6 Notificador: preview de mensajes + `DATA/notifier.py` (clase `Notificador`)
-    listo para Telegram vía `LONDONBOS_TG_TOKEN` / `LONDONBOS_TG_CHAT` (en `DATA/.env`).
-    Bot dedicado creado por el usuario (no reusar el de KRONOS).
-  - M7 Logger: `DATA/londonbos_log.db` (tabla `sesiones`); al generar dashboard se
-    guarda la sesión del día. Histórico visible en vista M7. Resuelve el pedido de
-    "historial de sesiones pasadas" (falta solo selector de fecha en el dashboard).
+  - M5 Gestor: simulador interactivo **BE+1R / TP fijo +1.5R / corte 11:00** (motor real IB pendiente: requiere gateway fuera de read-only). **Eliminados: parcial +2R y trailing**.
+  - M6 Notificador: preview de mensajes + `DATA/notifier.py` (clase `Notificador`) listo para Telegram vía `LONDONBOS_TG_TOKEN` / `LONDONBOS_TG_CHAT` (en `DATA/.env`). Eventos: box, breakout, BE +1R, TP +1.5R, cierre/corte 11:00. Bot dedicado creado por el usuario (no reusar el de KRONOS).
+  - M7 Logger: `DATA/londonbos_log.db` (tabla `sesiones`); al generar dashboard se guarda la sesión del día. Histórico visible en vista M7. Resuelve el pedido de "historial de sesiones pasadas" (falta solo selector de fecha en el dashboard).
 
 ## Automatización (CRONS — 2026-07-17)
 
@@ -142,8 +134,6 @@ ruptura ocurre temprano y el 120m era una ilusión de medición por fotos aislad
 
 ## Ratio de riesgo (R:R)
 - **Fijado en 1.5:1** (acordado con el usuario 2026-07-17). TP = entry + 1.5×riesgo.
-  El trailing del M5 NO modifica este ratio: es técnica de salida post-+2R que mejora
-  el R:R promedio real cuando hay tendencia, pero el TP de referencia sigue 1.5R.
 - Valida mejor que 2:1 en datos reales del 13JUL (el 2:1 nunca se alcanzó; 1.5:1 sí).
 - Convención de sesiones documentada también en los docstrings de `fx_session.py` y
   `backtest.py`.

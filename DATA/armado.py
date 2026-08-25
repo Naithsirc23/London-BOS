@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fx_session as fx
 from notifier import Notificador, mensaje_box
 
-MARGIN = 0.00002  # 2 pips buffer
+MARGIN = 0.00020  # 2 pips buffer (0.00020 = 2.0 pips)
 
 
 def main():

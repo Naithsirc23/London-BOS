@@ -8,7 +8,7 @@ Reglas implementadas:
   - Filtro de operacion: rango en pips debe estar en [15, 40].
   - Entradas: buy stop = techo + 2 pips; sell stop = piso - 2 pips.
   - SL: lado opuesto del box (long -> piso; short -> techo).
-  - Riesgo 2:1: TP = entrada +/- 2 * riesgo.
+  - Riesgo 1.5:1: TP = entrada +/- 1.5 * riesgo.
   - El breakout se determina por el primer stop cruzado en la sesion de Londres.
 """
 import yfinance as yf
@@ -21,7 +21,7 @@ ldn = pytz.timezone('Europe/London')
 
 BUFFER = 0.00020          # 2 pips
 RANGE_MIN, RANGE_MAX = 15, 40
-RR = 2.0                  # riesgo:recompensa 2:1
+RR = 1.5                  # riesgo:recompensa 1.5:1
 
 now = datetime.now(lima)
 start_dt = now - timedelta(days=7)

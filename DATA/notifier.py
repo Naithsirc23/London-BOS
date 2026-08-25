@@ -4,8 +4,8 @@ Envía alertas a Telegram cuando ocurren eventos:
   - box matutino (al generar dashboard)
   - breakout detectado
   - break-even alcanzado (+1R)
-  - salida parcial (+2R)
-  - cierre de operación
+  - take profit +1.5R
+  - cierre de operación (o corte 11:00 Lima)
 
 Uso:
   from notifier import Notificador
